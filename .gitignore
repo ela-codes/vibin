@@ -143,7 +143,6 @@ hs_err_pid*
 replay_pid*
 
 ### Maven ###
-target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -167,7 +166,7 @@ logs
 **/*.backup.*
 **/*.back.*
 
-node_modules
+frontend/node_modules
 bower_components
 
 *.sublime*
