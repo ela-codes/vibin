@@ -1,0 +1,95 @@
+package ela.project.vibin;
+
+import ela.project.vibin.controller.SpotifyAuthController;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpSession;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.model_objects.specification.User;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
+import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+
+public class SpotifyCallbackControllerTest {
+
+    @Mock
+    private SpotifyApi mockSpotifyApi;
+
+    @Mock
+    private MockHttpSession mockSession;
+
+    @Mock
+    private AuthorizationCodeCredentials mockCredentials;
+
+    @Mock
+    private User mockUser;
+
+    private SpotifyAuthController controller;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        controller = new SpotifyAuthController(mockSpotifyApi);
+    }
+
+    @Test
+    void callback_ShouldReturnWelcomeMessage_WhenStateIsValid() throws Exception {
+        // Arrange
+        AuthorizationCodeRequest.Builder mockAuthCodeBuilder = mock(AuthorizationCodeRequest.Builder.class);
+        AuthorizationCodeRequest mockAuthCodeRequest = mock(AuthorizationCodeRequest.class);
+
+        GetCurrentUsersProfileRequest.Builder mockUserProfileBuilder = mock(GetCurrentUsersProfileRequest.Builder.class);
+        GetCurrentUsersProfileRequest mockUserProfileRequest = mock(GetCurrentUsersProfileRequest.class);
+
+        String validState = "valid_state";
+        String code = "auth_code";
+        String accessToken = "mock_access_token";
+        String refreshToken = "mock_refresh_token";
+
+        // Mock session state
+        when(mockSession.getAttribute("oauth_state")).thenReturn(validState);
+
+        // Mock authorization code flow
+        when(mockSpotifyApi.authorizationCode(code)).thenReturn(mockAuthCodeBuilder);
+        when(mockAuthCodeBuilder.build()).thenReturn(mockAuthCodeRequest);
+        when(mockAuthCodeRequest.execute()).thenReturn(mockCredentials);
+        when(mockCredentials.getAccessToken()).thenReturn(accessToken);
+        when(mockCredentials.getRefreshToken()).thenReturn(refreshToken);
+
+        // Mock user profile retrieval
+        when(mockSpotifyApi.getCurrentUsersProfile()).thenReturn(mockUserProfileBuilder);
+        when(mockUserProfileBuilder.build()).thenReturn(mockUserProfileRequest);
+        when(mockUserProfileRequest.execute()).thenReturn(mockUser);
+        when(mockUser.getDisplayName()).thenReturn("John Doe");
+
+        // Act
+        ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, mockSession);
+
+        // Assert
+        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("Welcome, John Doe"));
+
+        // Verify interactions
+        verify(mockSession).getAttribute("oauth_state");
+        verify(mockSpotifyApi).authorizationCode(code);
+        verify(mockAuthCodeBuilder).build();
+        verify(mockAuthCodeRequest).execute();
+        verify(mockSpotifyApi).setAccessToken(accessToken);
+        verify(mockSpotifyApi).setRefreshToken(refreshToken);
+        verify(mockSpotifyApi).getCurrentUsersProfile();
+        verify(mockUserProfileBuilder).build();
+        verify(mockUserProfileRequest).execute();
+    }
+
+}
