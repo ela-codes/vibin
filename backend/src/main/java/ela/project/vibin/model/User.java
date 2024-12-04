@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user")
+@Table(name = "spotify_user")
 @Getter
 @Setter
 public class User {
