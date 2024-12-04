@@ -1,6 +1,7 @@
 package ela.project.vibin;
 
 import ela.project.vibin.controller.SpotifyAuthController;
+import ela.project.vibin.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -27,6 +28,9 @@ public class SpotifyCallbackControllerTest {
     private SpotifyApi mockSpotifyApi;
 
     @Mock
+    private UserService mockUserService;
+
+    @Mock
     private MockHttpSession mockSession;
 
     @Mock
@@ -40,7 +44,7 @@ public class SpotifyCallbackControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controller = new SpotifyAuthController(mockSpotifyApi);
+        controller = new SpotifyAuthController(mockSpotifyApi, mockUserService);
     }
 
     @Test
@@ -56,6 +60,7 @@ public class SpotifyCallbackControllerTest {
         String code = "auth_code";
         String accessToken = "mock_access_token";
         String refreshToken = "mock_refresh_token";
+        String error = "";
 
         // Mock session state
         when(mockSession.getAttribute("oauth_state")).thenReturn(validState);
@@ -74,11 +79,11 @@ public class SpotifyCallbackControllerTest {
         when(mockUser.getDisplayName()).thenReturn("John Doe");
 
         // Act
-        ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, mockSession);
+        ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, error, mockSession);
 
         // Assert
         assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("Welcome, John Doe"));
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("Welcome, John Doe! Your account is connected."));
 
         // Verify interactions
         verify(mockSession).getAttribute("oauth_state");
@@ -90,6 +95,36 @@ public class SpotifyCallbackControllerTest {
         verify(mockSpotifyApi).getCurrentUsersProfile();
         verify(mockUserProfileBuilder).build();
         verify(mockUserProfileRequest).execute();
+    }
+
+    @Test
+    void callback_ShouldReturnBadRequest_WhenStateIsInvalid() {
+        // Arrange
+        String code = "auth_code";
+        String invalidState = "invalid_state";
+        String error = "";
+        when(mockSession.getAttribute("oauth_state")).thenReturn("valid_state");
+
+        // Act
+        ResponseEntity<String> response = controller.handleSpotifyCallback(code, invalidState, error, mockSession);
+
+        // Assert
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("Invalid state parameter"));
+    }
+
+    @Test
+    void callback_ShouldReturnBadRequest_WhenAuthAccessDenied() {
+        // Arrange
+        String validState = "valid_state";
+        String error = "access_denied";
+
+        // Act
+        ResponseEntity<String> response = controller.handleSpotifyCallback(null, validState, error, mockSession);
+
+        // Assert
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("User did not accept the authorization request"));
     }
 
 }

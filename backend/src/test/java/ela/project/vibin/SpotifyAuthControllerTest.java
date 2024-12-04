@@ -2,6 +2,7 @@ package ela.project.vibin;
 
 import ela.project.vibin.controller.SpotifyAuthController;
 
+import ela.project.vibin.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,8 @@ class SpotifyAuthControllerTest {
     @Mock
     private SpotifyApi mockSpotifyApi;
 
+    @Mock
+    private UserService mockUserService;
 
     private MockHttpSession mockSession;
 
@@ -39,7 +42,7 @@ class SpotifyAuthControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controller = new SpotifyAuthController(mockSpotifyApi);
+        controller = new SpotifyAuthController(mockSpotifyApi, mockUserService);
         mockSession = new MockHttpSession();
     }
 
