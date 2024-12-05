@@ -1,6 +1,7 @@
 import HomeIndex from './home/HomeIndex';
 import LoginIndex from './session/LoginIndex';
-import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements, Link } from 'react-router-dom';
+import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
+
 
 const router = createBrowserRouter(createRoutesFromElements(
     <>
