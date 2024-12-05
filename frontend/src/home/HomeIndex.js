@@ -1,24 +1,28 @@
 import Row from 'react-bootstrap/Row';
 import HomeForm from './HomeForm';
-import LogoutButton from "../session/LogoutButton";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 
 function HomeIndex() {
 
     const [user, setUser] = useState({ userId: null, displayName: null });
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchUserDetails() {
             const response = await fetch("http://localhost:8080/api/user-details", {
                 credentials: "include",
             });
-            if (response.ok) {
+            if (response.ok) { // authorized user
                 const data = await response.json();
                 setUser({ userId: data.userId, displayName: data.displayName });
+            } else if (response.status === 401) { // unauthorized access
+                navigate("/"); // go back to login page
             }
         }
         fetchUserDetails();
-    }, []);
+    });
 
     return (
         <Row className="justify-content-center">
