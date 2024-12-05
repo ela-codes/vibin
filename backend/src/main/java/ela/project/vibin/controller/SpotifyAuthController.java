@@ -14,6 +14,7 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -34,7 +35,7 @@ public class SpotifyAuthController {
         String state = UUID.randomUUID().toString();
 
         // store the random UUID value in the HTTP session
-        session.setAttribute("oauth_state", state);
+        session.setAttribute("state", state);
 
         AuthorizationCodeUriRequest authRequest = spotifyApi.authorizationCodeUri()
             .state(state)
@@ -57,15 +58,20 @@ public class SpotifyAuthController {
 
         // If user did not accept the spotify authorization request, stop auth flow
         if (!error.isEmpty()) {
-            return ResponseEntity.badRequest().body("User did not accept the authorization request");
+            return ResponseEntity
+                    .status(302)
+                    .header("Location", "http://localhost:3000/?error=UserDeniedAuthorization")
+                    .build();
         }
 
         // validate the state parameter to ensure it's the same one we passed when making the request
-        String storedState = (String) session.getAttribute("oauth_state");
+        String storedState = (String) session.getAttribute("state");
 
         // If there is a mismatch then reject the request and stop auth flow
         if (storedState == null || !storedState.equals(state)) {
-            return ResponseEntity.badRequest().body("Invalid state parameter");
+            return ResponseEntity.status(302)
+                    .header("Location", "http://localhost:3000/?error=InvalidState")
+                    .build();
         }
 
         try {
@@ -81,8 +87,6 @@ public class SpotifyAuthController {
             spotifyApi.setAccessToken(credentials.getAccessToken()); // expires in 3600 seconds
             spotifyApi.setRefreshToken(credentials.getRefreshToken());
 
-            System.out.println(credentials);
-
             // get the user's profile using the access token
             User user = spotifyApi.getCurrentUsersProfile()
                     .build()
@@ -91,13 +95,32 @@ public class SpotifyAuthController {
             // Save the user's email to the database
             userService.saveUser(user.getEmail());
 
-            // return 200 OK with the welcome message in the response body
-            return ResponseEntity.ok("Welcome, " + user.getDisplayName() + "! Your account is connected.");
+            // Save user info to session
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("displayName", user.getDisplayName());
+
+            // if successful, redirect user to home page
+            return ResponseEntity.status(302)
+                    .header("Location", "http://localhost:3000/home")
+                    .build();
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error during Spotify callback: " + e.getMessage());
         }
 
+    }
+
+    @GetMapping("/user-details")
+    public ResponseEntity<Map<String, String>> getUserDetails(HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        String displayName = (String) session.getAttribute("displayName");
+
+        if (userId == null || displayName == null) {
+            return ResponseEntity.status(401).body(null); // Unauthorized
+        }
+
+        Map<String, String> userDetails = Map.of("userId", userId, "displayName", displayName);
+        return ResponseEntity.ok(userDetails);
     }
 
 }

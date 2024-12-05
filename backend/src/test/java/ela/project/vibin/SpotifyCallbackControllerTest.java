@@ -82,8 +82,7 @@ public class SpotifyCallbackControllerTest {
         ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, error, mockSession);
 
         // Assert
-        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("Welcome, John Doe! Your account is connected."));
+        assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());
 
         // Verify interactions
         verify(mockSession).getAttribute("oauth_state");
@@ -109,8 +108,7 @@ public class SpotifyCallbackControllerTest {
         ResponseEntity<String> response = controller.handleSpotifyCallback(code, invalidState, error, mockSession);
 
         // Assert
-        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("Invalid state parameter"));
+        assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());
     }
 
     @Test
@@ -123,8 +121,7 @@ public class SpotifyCallbackControllerTest {
         ResponseEntity<String> response = controller.handleSpotifyCallback(null, validState, error, mockSession);
 
         // Assert
-        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("User did not accept the authorization request"));
+        assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());
     }
 
 }

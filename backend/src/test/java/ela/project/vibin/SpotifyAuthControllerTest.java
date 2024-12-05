@@ -80,6 +80,7 @@ class SpotifyAuthControllerTest {
         verify(request).execute();
     }
 
+
     @Test
     void login_ShouldStoreStateInSession() {
         // Arrange
