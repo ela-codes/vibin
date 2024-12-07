@@ -30,9 +30,9 @@ public class TrackController {
 
         // validate session principal
         // TODO - maybe check that the user is in the database?
-//        if (session.getAttribute("userId") == null) {
-//            return new ResponseEntity<>("um? you are NOT logged in", HttpStatus.UNAUTHORIZED);
-//        }
+        if (session.getAttribute("userId") == null) {
+            return new ResponseEntity<>("um? you are NOT logged in", HttpStatus.UNAUTHORIZED);
+        }
 
         // validate incoming client-side data
         if (!isValidInput(input)) {
