@@ -1,6 +1,7 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.model.Track;
+import ela.project.vibin.service.EmotionRecognitionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,12 @@ import java.util.List;
 @RequestMapping("/api")
 public class TrackController {
 
+    private final EmotionRecognitionService emotionRecognitionService;
+
+    public TrackController(EmotionRecognitionService emotionRecognitionService) {
+        this.emotionRecognitionService = emotionRecognitionService;
+    }
+
     @GetMapping("/get-tracks")
     public ResponseEntity<String> getTracks(
             @RequestParam(value = "submission") String input,
@@ -23,9 +30,9 @@ public class TrackController {
 
         // validate session principal
         // TODO - maybe check that the user is in the database?
-        if (session.getAttribute("userId") == null) {
-            return new ResponseEntity<>("um? you are NOT logged in", HttpStatus.UNAUTHORIZED);
-        }
+//        if (session.getAttribute("userId") == null) {
+//            return new ResponseEntity<>("um? you are NOT logged in", HttpStatus.UNAUTHORIZED);
+//        }
 
         // validate incoming client-side data
         if (!isValidInput(input)) {
@@ -33,6 +40,11 @@ public class TrackController {
         }
 
         // transform input to emotion
+        try {
+            String emotion = emotionRecognitionService.analyze(input);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error analyzing emotion: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         // transform emotion to mood
 
@@ -50,8 +62,7 @@ public class TrackController {
     }
 
     private boolean isValidInput(String input) {
-        boolean isValidLength = input.length() > 3;
-        return input != null && !input.isEmpty() && isValidLength;
+        return input != null && input.length() > 3;
 
     }
 }
