@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -22,13 +19,18 @@ public class Genre {
     private UUID id;
 
     @Column(unique = true, nullable = false)
-    private String name;
+    private String genre;
 
-    @ManyToMany
-    @JoinTable(
-            name = "genre_mood", // name of the many-to-many join table
-            joinColumns = @JoinColumn(name = "genre_id"), // FK to Genre
-            inverseJoinColumns = @JoinColumn(name = "mood_id") // FK to Mood
-    )
-    private Set<Mood> moods = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "mood_id", nullable = false)
+    private Mood mood; // many moods can belong to one emotion
+
+
+//    @ManyToMany
+//    @JoinTable(
+//            name = "genre_mood", // name of the many-to-many join table
+//            joinColumns = @JoinColumn(name = "genre_id"), // FK to Genre
+//            inverseJoinColumns = @JoinColumn(name = "mood_id") // FK to Mood
+//    )
+//    private Set<Mood> moods = new HashSet<>();
 }

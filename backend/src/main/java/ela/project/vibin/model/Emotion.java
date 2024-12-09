@@ -22,8 +22,8 @@ public class Emotion {
 
     @Column(unique = true, nullable = false)
     @Enumerated(EnumType.STRING)
-    private EmotionType name;
+    private EmotionType emotion;
 
-    @OneToMany(mappedBy = "emotion")
-    private Set<Mood> moods = new HashSet<>();
+//    @OneToMany(mappedBy = "emotion")
+//    private Set<Mood> moods = new HashSet<>();
 }

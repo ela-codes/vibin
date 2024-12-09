@@ -1,7 +1,11 @@
 package ela.project.vibin.controller;
 
-import ela.project.vibin.model.Track;
+import ela.project.vibin.model.EmotionType;
+import ela.project.vibin.model.Mood;
 import ela.project.vibin.service.EmotionRecognitionService;
+import ela.project.vibin.service.EmotionService;
+import ela.project.vibin.service.GenreService;
+import ela.project.vibin.service.MoodService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,17 +14,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
 public class TrackController {
 
     private final EmotionRecognitionService emotionRecognitionService;
+    private final EmotionService emotionService;
+    private final MoodService moodService;
+    private final GenreService genreService;
 
-    public TrackController(EmotionRecognitionService emotionRecognitionService) {
+    public TrackController(EmotionRecognitionService emotionRecognitionService,
+                           EmotionService emotionService,
+                           MoodService moodService,
+                           GenreService genreService) {
         this.emotionRecognitionService = emotionRecognitionService;
+        this.emotionService = emotionService;
+        this.moodService = moodService;
+        this.genreService = genreService;
     }
 
     @GetMapping("/get-tracks")
@@ -39,16 +52,26 @@ public class TrackController {
             return new ResponseEntity<>("yo stop capping, pass a valid string", HttpStatus.BAD_REQUEST);
         }
 
-        // transform input to emotion
         try {
-            String emotion = emotionRecognitionService.analyze(input);
+            // transform input to emotion
+            EmotionType emotionName = EmotionType.valueOf(emotionRecognitionService.analyze(input));
+            UUID emotionId = emotionService.getEmotionId(emotionName);
+
+            // get moods based on emotion
+            List<UUID> moodIds = moodService.getAllMoodIds(emotionId);
+
+            // get genres based on moods
+            List<String> genreNames = genreService.getAllGenreNames(moodIds);
+
+            return new ResponseEntity<>(
+                    String.format("You're mostly feeling: %s%n%n%s%n%s", emotionName, "Here are some recommended genres: ", genreNames),
+                    HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>("Error analyzing emotion: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // transform emotion to mood
 
-        // transform mood to genre
 
         // generate playlist query
 
@@ -58,7 +81,7 @@ public class TrackController {
 
         // return track information
 
-        return new ResponseEntity<String>("did I eat with these tracks?" ,HttpStatus.OK);
+        // return new ResponseEntity<String>("did I eat with these tracks?" ,HttpStatus.OK);
     }
 
     private boolean isValidInput(String input) {

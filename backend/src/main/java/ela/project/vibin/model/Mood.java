@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -20,13 +18,14 @@ public class Mood {
     private UUID id;
 
     @Column(unique = true, nullable = false)
-    private String name;
+    private String mood;
 
     @ManyToOne
     @JoinColumn(name = "emotion_id", nullable = false)
     private Emotion emotion; // many moods can belong to one emotion
 
-    @ManyToMany(mappedBy = "moods")
-    private Set<Genre> genres = new HashSet<>();
+//
+//    @ManyToMany(mappedBy = "moods")
+//    private Set<Genre> genres = new HashSet<>();
 
 }

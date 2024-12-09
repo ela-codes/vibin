@@ -98,6 +98,7 @@ public class SpotifyAuthController {
             // Save user info to session
             session.setAttribute("userId", user.getId());
             session.setAttribute("displayName", user.getDisplayName());
+            session.setAttribute("accessToken", credentials.getAccessToken());
 
             // if successful, redirect user to home page
             return ResponseEntity.status(302)
