@@ -1,11 +1,7 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.model.EmotionType;
-import ela.project.vibin.model.Mood;
-import ela.project.vibin.service.EmotionRecognitionService;
-import ela.project.vibin.service.EmotionService;
-import ela.project.vibin.service.GenreService;
-import ela.project.vibin.service.MoodService;
+import ela.project.vibin.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +21,18 @@ public class TrackController {
     private final EmotionService emotionService;
     private final MoodService moodService;
     private final GenreService genreService;
+    private final SpotifyQueryService spotifyQueryService;
 
     public TrackController(EmotionRecognitionService emotionRecognitionService,
                            EmotionService emotionService,
                            MoodService moodService,
-                           GenreService genreService) {
+                           GenreService genreService,
+                           SpotifyQueryService spotifyQueryService) {
         this.emotionRecognitionService = emotionRecognitionService;
         this.emotionService = emotionService;
         this.moodService = moodService;
         this.genreService = genreService;
+        this.spotifyQueryService = spotifyQueryService;
     }
 
     @GetMapping("/get-tracks")
@@ -63,8 +62,12 @@ public class TrackController {
             // get genres based on moods
             List<String> genreNames = genreService.getAllGenreNames(moodIds);
 
+            String randomPlaylistId = spotifyQueryService.getSpotifyPlaylistId(genreNames, session);
+
             return new ResponseEntity<>(
-                    String.format("You're mostly feeling: %s%n%n%s%n%s", emotionName, "Here are some recommended genres: ", genreNames),
+                    String.format("You're mostly feeling: %s%n%n%s%n%s%n%s", emotionName,
+                            "Here's my recommendation: ", genreNames,
+                            randomPlaylistId),
                     HttpStatus.OK);
 
         } catch (Exception e) {
@@ -74,6 +77,8 @@ public class TrackController {
 
 
         // generate playlist query
+
+
 
         // generate get playlist items query
 
