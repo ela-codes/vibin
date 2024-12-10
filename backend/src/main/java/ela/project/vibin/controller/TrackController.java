@@ -1,6 +1,7 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.model.EmotionType;
+import ela.project.vibin.model.Track;
 import ela.project.vibin.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -62,31 +63,22 @@ public class TrackController {
             // get genres based on moods
             List<String> genreNames = genreService.getAllGenreNames(moodIds);
 
+            // get playlist id based on genres
             String randomPlaylistId = spotifyQueryService.getSpotifyPlaylistId(genreNames, session);
 
-            return new ResponseEntity<>(
-                    String.format("You're mostly feeling: %s%n%n%s%n%s%n%s", emotionName,
-                            "Here's my recommendation: ", genreNames,
-                            randomPlaylistId),
-                    HttpStatus.OK);
+            // get tracks based on playlist id
+            List<Track> tracksList = spotifyQueryService.getSpotifyTracks(randomPlaylistId, session);
+
+//            return new ResponseEntity<>(
+//                    String.format("You're mostly feeling: %s%n%n%s%n%s%n%s", emotionName,
+//                            "Here's my recommendation: ", tracksList,
+//                            randomPlaylistId),
+//                    HttpStatus.OK);
+            return new ResponseEntity<>(tracksList.toString(), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>("Error analyzing emotion: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-
-
-        // generate playlist query
-
-
-
-        // generate get playlist items query
-
-        // generate track query
-
-        // return track information
-
-        // return new ResponseEntity<String>("did I eat with these tracks?" ,HttpStatus.OK);
     }
 
     private boolean isValidInput(String input) {
