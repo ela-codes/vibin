@@ -3,7 +3,6 @@ package ela.project.vibin.repository;
 import ela.project.vibin.model.Emotion;
 import ela.project.vibin.model.EmotionType;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,9 +11,7 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
-
 
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2) // uses in-memory db for testing
@@ -40,7 +37,7 @@ class EmotionRepositoryTest {
     }
 
     @Test
-    public void findByEmotion_invalidEmotionType_returnsEmotion() {
+    public void findByEmotion_invalidEmotionType_throwsException() {
         // Arrange
         for (EmotionType emotionType : EmotionType.values()) {
             Emotion emotion = Emotion.builder()
