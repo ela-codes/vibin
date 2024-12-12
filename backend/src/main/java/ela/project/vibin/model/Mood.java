@@ -1,8 +1,7 @@
 package ela.project.vibin.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -10,6 +9,9 @@ import java.util.UUID;
 @Table(name = "mood")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Mood {
 
     @Id
@@ -20,7 +22,7 @@ public class Mood {
     @Column(unique = true, nullable = false)
     private String mood;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emotion_id", nullable = false)
     private Emotion emotion; // many moods can belong to one emotion
 

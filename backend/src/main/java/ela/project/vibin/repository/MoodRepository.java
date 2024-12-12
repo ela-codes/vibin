@@ -10,5 +10,5 @@ import java.util.UUID;
 
 public interface MoodRepository extends JpaRepository<Mood, UUID> {
     @Query("SELECT m FROM Mood m WHERE m.emotion.id = :emotion_id")
-    List<Mood> findMoods(@Param("emotion_id") UUID emotionId);
+    List<Mood> findMoodsBy(@Param("emotion_id") UUID emotionId);
 }

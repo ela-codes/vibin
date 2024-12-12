@@ -17,7 +17,7 @@ public class MoodService {
     }
 
     public List<UUID> getAllMoodIds(UUID emotionId) {
-        List<Mood> moodsList  = moodRepository.findMoods(emotionId);
+        List<Mood> moodsList  = moodRepository.findMoodsBy(emotionId);
         // for every mood object in the list, get their UUIDs
 
         List<UUID> moodIdList = new ArrayList<UUID>();
