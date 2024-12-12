@@ -2,15 +2,19 @@
 package ela.project.vibin.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "genre")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Genre {
 
     @Id
@@ -32,5 +36,5 @@ public class Genre {
 //            joinColumns = @JoinColumn(name = "genre_id"), // FK to Genre
 //            inverseJoinColumns = @JoinColumn(name = "mood_id") // FK to Mood
 //    )
-//    private Set<Mood> moods = new HashSet<>();
+//    private List<Mood> moods = new ArrayList<>();
 }
