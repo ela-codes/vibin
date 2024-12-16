@@ -69,11 +69,6 @@ public class TrackController {
             // get tracks based on playlist id
             List<Track> tracksList = spotifyQueryServiceImpl.getSpotifyTracks(randomPlaylistId, session);
 
-//            return new ResponseEntity<>(
-//                    String.format("You're mostly feeling: %s%n%n%s%n%s%n%s", emotionName,
-//                            "Here's my recommendation: ", tracksList,
-//                            randomPlaylistId),
-//                    HttpStatus.OK);
             return new ResponseEntity<>(tracksList.toString(), HttpStatus.OK);
 
         } catch (Exception e) {
@@ -82,7 +77,7 @@ public class TrackController {
     }
 
     private boolean isValidInput(String input) {
-        return input != null && input.length() > 3;
+        return input != null && input.length() > 2;
 
     }
 }
