@@ -1,11 +1,11 @@
-package ela.project.vibin;
+package ela.project.vibin.controller;
 
-import ela.project.vibin.controller.SpotifyAuthController;
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpSession;
@@ -61,7 +61,7 @@ public class SpotifyCallbackControllerTest {
         String error = "";
 
         // Mock session state
-        when(mockSession.getAttribute("oauth_state")).thenReturn(validState);
+        when(mockSession.getAttribute("state")).thenReturn(validState);
 
         // Mock authorization code flow
         when(mockSpotifyApi.authorizationCode(code)).thenReturn(mockAuthCodeBuilder);
@@ -80,13 +80,14 @@ public class SpotifyCallbackControllerTest {
         ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, error, mockSession);
 
         // Assert
-        assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
 
         // Verify interactions
-        verify(mockSession).getAttribute("oauth_state");
-        verify(mockSpotifyApi).authorizationCode(code);
+        verify(mockSession).getAttribute("state");
         verify(mockAuthCodeBuilder).build();
         verify(mockAuthCodeRequest).execute();
+
+        verify(mockSpotifyApi).authorizationCode(code);
         verify(mockSpotifyApi).setAccessToken(accessToken);
         verify(mockSpotifyApi).setRefreshToken(refreshToken);
         verify(mockSpotifyApi).getCurrentUsersProfile();

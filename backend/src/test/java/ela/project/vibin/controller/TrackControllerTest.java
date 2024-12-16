@@ -1,4 +1,4 @@
-package ela.project.vibin;
+package ela.project.vibin.controller;
 
 public class TrackControllerTest {
 

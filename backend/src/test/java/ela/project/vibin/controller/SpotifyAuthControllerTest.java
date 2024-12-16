@@ -1,6 +1,4 @@
-package ela.project.vibin;
-
-import ela.project.vibin.controller.SpotifyAuthController;
+package ela.project.vibin.controller;
 
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +68,7 @@ class SpotifyAuthControllerTest {
         // Assert
         assertNotNull(result);
         assertEquals(expectedUrl, result);
-        assertNotNull(mockSession.getAttribute("oauth_state"));
+        assertNotNull(mockSession.getAttribute("state"));
 
         // Verify the builder methods were called
         verify(builder).state(any());
@@ -98,7 +96,7 @@ class SpotifyAuthControllerTest {
         controller.login(mockSession);
 
         // Assert
-        String storedState = (String) mockSession.getAttribute("oauth_state");
+        String storedState = (String) mockSession.getAttribute("state");
         assertNotNull(storedState);
         assertTrue(storedState.length() > 0);
     }
