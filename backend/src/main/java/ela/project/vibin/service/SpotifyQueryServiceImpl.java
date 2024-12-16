@@ -3,6 +3,7 @@ package ela.project.vibin.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ela.project.vibin.model.Track;
+import ela.project.vibin.service.abstraction.SpotifyQueryService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,15 @@ import java.util.*;
 import static java.lang.Math.min;
 
 @Service
-public class SpotifyQueryService {
+public class SpotifyQueryServiceImpl implements SpotifyQueryService {
 
+    private final RestTemplate restTemplate;
 
+    public SpotifyQueryServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @Override
     public String getSpotifyPlaylistId(List<String> genreList, HttpSession session) {
         // Remove any duplicates in genreList
         Set<String> genreSet = new HashSet<>(genreList);
@@ -25,8 +32,7 @@ public class SpotifyQueryService {
         String genres = String.join("+", genreSet);
 
         // Generate random int between 0-20 both inclusive
-        Random rand = new Random();
-        int randomOffset = rand.nextInt(21);
+        int randomOffset = getRandomInt(21);
 
         // Build search query
         final int PLAYLIST_LIMIT = 1;
@@ -34,20 +40,12 @@ public class SpotifyQueryService {
         String filters = String.format("&type=playlist&limit=%d&offset=%d", PLAYLIST_LIMIT, randomOffset);
         String searchQuery = String.format("https://api.spotify.com/v1/search?q=%s%s", genres, filters);
 
-        // Set up query headers
-        HttpHeaders headers = new HttpHeaders();
-        String userAccessToken = (String) session.getAttribute("accessToken"); // Retrieve from user session
-        headers.set("Authorization", "Bearer " + userAccessToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        // Set up query
+        HttpEntity<String> entity = createEntityForSpotifyRequest((String) session.getAttribute("accessToken"));
 
         // Make the API call
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.exchange(
-                    URI.create(searchQuery), HttpMethod.GET, entity, String.class
-            );
+            ResponseEntity<String> response = sendSpotifyGetRequest(searchQuery, entity);
 
             // Check for error in response
             if (response.getStatusCode() != HttpStatus.OK) {
@@ -65,11 +63,10 @@ public class SpotifyQueryService {
         }
     }
 
-
+    @Override
     public List<Track> getSpotifyTracks(String playlistId, HttpSession session) {
         // Generate random int between 0-10 both inclusive
-        Random rand = new Random();
-        int randomOffset = rand.nextInt(11);
+        int randomOffset = getRandomInt(11);
 
         // Build search query
         final int TRACK_LIMIT = 50;
@@ -161,7 +158,6 @@ public class SpotifyQueryService {
     }
 
     private ResponseEntity<String> sendSpotifyGetRequest(String searchQuery, HttpEntity<String> entity) {
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate.exchange(
                 URI.create(searchQuery), HttpMethod.GET, entity, String.class
         );
