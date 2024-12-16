@@ -18,22 +18,22 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class TrackController {
 
-    private final EmotionRecognitionService emotionRecognitionService;
-    private final EmotionService emotionService;
-    private final MoodService moodService;
-    private final GenreService genreService;
-    private final SpotifyQueryService spotifyQueryService;
+    private final EmotionRecognitionServiceImpl emotionRecognitionServiceImpl;
+    private final EmotionServiceImpl emotionServiceImpl;
+    private final MoodServiceImpl moodServiceImpl;
+    private final GenreServiceImpl genreServiceImpl;
+    private final SpotifyQueryServiceImpl spotifyQueryServiceImpl;
 
-    public TrackController(EmotionRecognitionService emotionRecognitionService,
-                           EmotionService emotionService,
-                           MoodService moodService,
-                           GenreService genreService,
-                           SpotifyQueryService spotifyQueryService) {
-        this.emotionRecognitionService = emotionRecognitionService;
-        this.emotionService = emotionService;
-        this.moodService = moodService;
-        this.genreService = genreService;
-        this.spotifyQueryService = spotifyQueryService;
+    public TrackController(EmotionRecognitionServiceImpl emotionRecognitionServiceImpl,
+                           EmotionServiceImpl emotionServiceImpl,
+                           MoodServiceImpl moodServiceImpl,
+                           GenreServiceImpl genreServiceImpl,
+                           SpotifyQueryServiceImpl spotifyQueryServiceImpl) {
+        this.emotionRecognitionServiceImpl = emotionRecognitionServiceImpl;
+        this.emotionServiceImpl = emotionServiceImpl;
+        this.moodServiceImpl = moodServiceImpl;
+        this.genreServiceImpl = genreServiceImpl;
+        this.spotifyQueryServiceImpl = spotifyQueryServiceImpl;
     }
 
     @GetMapping("/get-tracks")
@@ -54,20 +54,20 @@ public class TrackController {
 
         try {
             // transform input to emotion
-            EmotionType emotionName = EmotionType.valueOf(emotionRecognitionService.analyze(input));
-            UUID emotionId = emotionService.getEmotionId(emotionName);
+            EmotionType emotionName = EmotionType.valueOf(emotionRecognitionServiceImpl.analyze(input));
+            UUID emotionId = emotionServiceImpl.getEmotionId(emotionName);
 
             // get moods based on emotion
-            List<UUID> moodIds = moodService.getAllMoodIds(emotionId);
+            List<UUID> moodIds = moodServiceImpl.getAllMoodIds(emotionId);
 
             // get genres based on moods
-            List<String> genreNames = genreService.getAllGenreNames(moodIds);
+            List<String> genreNames = genreServiceImpl.getAllGenreNames(moodIds);
 
             // get playlist id based on genres
-            String randomPlaylistId = spotifyQueryService.getSpotifyPlaylistId(genreNames, session);
+            String randomPlaylistId = spotifyQueryServiceImpl.getSpotifyPlaylistId(genreNames, session);
 
             // get tracks based on playlist id
-            List<Track> tracksList = spotifyQueryService.getSpotifyTracks(randomPlaylistId, session);
+            List<Track> tracksList = spotifyQueryServiceImpl.getSpotifyTracks(randomPlaylistId, session);
 
 //            return new ResponseEntity<>(
 //                    String.format("You're mostly feeling: %s%n%n%s%n%s%n%s", emotionName,

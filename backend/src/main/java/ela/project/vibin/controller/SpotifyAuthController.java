@@ -1,6 +1,6 @@
 package ela.project.vibin.controller;
 
-import ela.project.vibin.service.UserService;
+import ela.project.vibin.service.UserServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +22,12 @@ import java.util.UUID;
 public class SpotifyAuthController {
 
     private final SpotifyApi spotifyApi;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     // constructor injection
-    public SpotifyAuthController(SpotifyApi spotifyApi, UserService userService) {
+    public SpotifyAuthController(SpotifyApi spotifyApi, UserServiceImpl userServiceImpl) {
         this.spotifyApi = spotifyApi;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
     }
 
     @GetMapping("/login")
@@ -93,7 +93,7 @@ public class SpotifyAuthController {
                     .execute();
 
             // Save the user's email to the database
-            userService.saveUser(user.getEmail());
+            userServiceImpl.saveUser(user.getEmail());
 
             // Save user info to session
             session.setAttribute("userId", user.getId());
