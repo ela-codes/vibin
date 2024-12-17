@@ -25,17 +25,15 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
 
     @Override
     public String getSpotifyPlaylistId(List<String> genreList, HttpSession session) {
-        // Remove any duplicates in genreList
-        Set<String> genreSet = new HashSet<>(genreList);
 
         // Set up playlist search query
-        String genres = String.join("+", genreSet);
+        String genres = mapGenreListToString(genreList);
 
         // Generate random int between 0-20 both inclusive
         int randomOffset = getRandomInt(21);
 
         // Build search query
-        final int PLAYLIST_LIMIT = 1;
+        final int PLAYLIST_LIMIT = 20;
 
         String filters = String.format("&type=playlist&limit=%d&offset=%d", PLAYLIST_LIMIT, randomOffset);
         String searchQuery = String.format("https://api.spotify.com/v1/search?q=%s%s", genres, filters);
@@ -56,7 +54,13 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.getBody());
 
-            return extractPlaylistId(rootNode);
+            String retrievedPlaylistId = extractPlaylistId(rootNode);
+
+            if (retrievedPlaylistId.isEmpty()) {
+                throw new RuntimeException("No playlist found for the given genres.");
+            } else {
+                return retrievedPlaylistId;
+            }
 
         } catch (Exception e) {
             throw new RuntimeException("Error fetching playlist from Spotify: " + e.getMessage(), e);
@@ -106,8 +110,15 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
     // helper function that extracts playlist ID from the JSON response body
     private String extractPlaylistId(JsonNode rootNode) {
         JsonNode playlistsNode = rootNode.path("playlists").path("items");
+
         if (playlistsNode.isArray() && !playlistsNode.isEmpty()) {
-            return playlistsNode.get(0).path("id").asText();
+            for (int i = 0; i < playlistsNode.size(); i++) {
+                JsonNode playlistItem = playlistsNode.get(i);
+
+                if (playlistItem != null && playlistItem.isObject()) {
+                    return playlistItem.path("id").asText();
+                }
+            }
         }
         return "";
     }
@@ -167,5 +178,23 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
     private int getRandomInt(int max) {
         Random rand = new Random();
         return rand.nextInt(max);
+    }
+
+    private String mapGenreListToString(List<String> genreList) {
+        // Remove any duplicates in genreList
+        Set<String> genreSet = new HashSet<>();
+
+        // Randomize order of genres to avoid repetitive genre results
+        Collections.shuffle(genreList);
+
+        // Ensure spaces inside genre names are replaced with '+'
+        for (String genre : genreList) {
+            String properGenreFormat = genre.replace(" ", "+").replace("&", "%26").replace("-", "+");
+            genreSet.add(properGenreFormat);
+        }
+        // Map genreSet to a single string
+        String genres = String.join("+", genreSet);
+
+        return genres;
     }
 }

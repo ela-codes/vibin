@@ -66,7 +66,7 @@ public class TrackController {
 
             // get playlist id based on genres
             String randomPlaylistId = spotifyQueryServiceImpl.getSpotifyPlaylistId(genreNames, session);
-            System.out.println(randomPlaylistId);
+
             // get tracks based on playlist id
             List<Track> tracksList = spotifyQueryServiceImpl.getSpotifyTracks(randomPlaylistId, session);
 
