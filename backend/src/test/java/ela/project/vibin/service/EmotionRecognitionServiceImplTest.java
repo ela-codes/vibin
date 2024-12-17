@@ -147,4 +147,54 @@ class EmotionRecognitionServiceImplTest {
         });
     }
 
+    @Test
+    public void isModelReady_modelIsReady_returnsTrue() {
+        // Assert
+        when(hfPropertiesConfig.getApiUrl()).thenReturn("mockApiUrl");
+        when(hfPropertiesConfig.getApiToken()).thenReturn("mockApiToken");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer mockApiToken");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        when(restTemplate.exchange(
+                Mockito.any(URI.class),
+                Mockito.eq(HttpMethod.GET),
+                Mockito.eq(entity),
+                Mockito.eq(String.class)
+        )).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
+
+        // Act
+        boolean result = emotionRecognitionService.isModelReady();
+
+        // Arrange
+        assertTrue(result);
+    }
+
+    @Test
+    public void isModelReady_modelIsNotReady_returnsFalse() {
+        // Arrange
+        when(hfPropertiesConfig.getApiUrl()).thenReturn("mockApiUrl");
+        when(hfPropertiesConfig.getApiToken()).thenReturn("mockApiToken");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer mockApiToken");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        when(restTemplate.exchange(
+                Mockito.any(URI.class),
+                Mockito.eq(HttpMethod.GET),
+                Mockito.eq(entity),
+                Mockito.eq(String.class)
+        )).thenReturn(new ResponseEntity<>("{}", HttpStatus.SERVICE_UNAVAILABLE));
+
+        // Act
+        boolean result = emotionRecognitionService.isModelReady();
+
+        // Arrange
+        assertFalse(result);
+    }
+
 }
