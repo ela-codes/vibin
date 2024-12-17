@@ -25,6 +25,24 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
     }
 
     @Override
+    public boolean isModelReady() {
+        final String HF_API_URL = hfPropertiesConfig.getApiUrl();
+        final String HF_API_TOKEN = hfPropertiesConfig.getApiToken();
+
+        // build HTTP request
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + HF_API_TOKEN);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // make the API call
+        ResponseEntity<String> response = restTemplate.exchange(
+                URI.create(HF_API_URL), HttpMethod.GET, entity, String.class);
+        return response.getStatusCode() == HttpStatus.OK;
+    }
+
+    @Override
     public String analyze(String input) throws JsonProcessingException {
 
         if (input == null || input.trim().isEmpty()) {

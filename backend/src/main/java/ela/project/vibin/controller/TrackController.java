@@ -53,6 +53,13 @@ public class TrackController {
             return new ResponseEntity<>(new ErrorResponse("Invalid request."), HttpStatus.BAD_REQUEST);
         }
 
+        // check if model is ready
+        if (!emotionRecognitionServiceImpl.isModelReady()) {
+            return new ResponseEntity<>(
+                    new ErrorResponse("Model is currently loading."), HttpStatus.SERVICE_UNAVAILABLE
+            );
+        }
+
         try {
             // transform input to emotion
             EmotionType emotionName = EmotionType.valueOf(emotionRecognitionServiceImpl.analyze(input));
