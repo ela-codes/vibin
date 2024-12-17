@@ -59,7 +59,7 @@ public class TrackControllerTest {
         when(session.getAttribute("userId")).thenReturn(null);
 
         // Act
-        ResponseEntity<String> response = trackController.getTracks("valid input", session);
+        ResponseEntity<?> response = trackController.getTracks("valid input", session);
 
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
@@ -72,8 +72,8 @@ public class TrackControllerTest {
         when(session.getAttribute("userId")).thenReturn("someUserId");
 
         // Act
-        ResponseEntity<String> response1 = trackController.getTracks("xy", session);
-        ResponseEntity<String> response2 = trackController.getTracks(null, session);
+        ResponseEntity<?> response1 = trackController.getTracks("xy", session);
+        ResponseEntity<?> response2 = trackController.getTracks(null, session);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response1.getStatusCode());
@@ -88,7 +88,7 @@ public class TrackControllerTest {
         when(emotionRecognitionServiceImpl.analyze(anyString())).thenThrow(new RuntimeException("Test Exception"));
 
         // Act
-        ResponseEntity<String> response = trackController.getTracks("valid input", session);
+        ResponseEntity<?> response = trackController.getTracks("valid input", session);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -110,12 +110,13 @@ public class TrackControllerTest {
                         new Track("track 2", "trackId2")));
 
         // Act
-        ResponseEntity<String> response = trackController.getTracks("valid input", session);
+        ResponseEntity<?> response = trackController.getTracks("valid input", session);
+        List<Track> trackResponse = (List<Track>) response.getBody();
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("track 1"));
-        assertTrue(response.getBody().contains("track 2"));
+        assertNotNull(trackResponse);
+        assertTrue(trackResponse.contains("track 1"));
+        assertTrue(trackResponse.contains("track 2"));
     }
 }

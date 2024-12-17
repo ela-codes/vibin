@@ -1,6 +1,7 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.model.EmotionType;
+import ela.project.vibin.model.ErrorResponse;
 import ela.project.vibin.model.Track;
 import ela.project.vibin.service.*;
 import jakarta.servlet.http.HttpSession;
@@ -37,19 +38,19 @@ public class TrackController {
     }
 
     @GetMapping("/get-tracks")
-    public ResponseEntity<String> getTracks(
+    public ResponseEntity<?> getTracks(
             @RequestParam(value = "submission") String input,
             HttpSession session) {
 
         // validate session principal
         // TODO - maybe check that the user is in the database?
         if (session.getAttribute("userId") == null) {
-            return new ResponseEntity<>("um? you are NOT logged in", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ErrorResponse("Unauthorized access."), HttpStatus.UNAUTHORIZED);
         }
 
         // validate incoming client-side data
         if (!isValidInput(input)) {
-            return new ResponseEntity<>("yo stop capping, pass a valid string", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("Invalid request."), HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -65,14 +66,14 @@ public class TrackController {
 
             // get playlist id based on genres
             String randomPlaylistId = spotifyQueryServiceImpl.getSpotifyPlaylistId(genreNames, session);
-
+            System.out.println(randomPlaylistId);
             // get tracks based on playlist id
             List<Track> tracksList = spotifyQueryServiceImpl.getSpotifyTracks(randomPlaylistId, session);
 
-            return new ResponseEntity<>(tracksList.toString(), HttpStatus.OK);
+            return new ResponseEntity<>(tracksList, HttpStatus.OK);
 
         } catch (Exception e) {
-            return new ResponseEntity<>("Error analyzing emotion: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ErrorResponse("Track error: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
