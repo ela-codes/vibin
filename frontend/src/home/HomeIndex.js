@@ -12,6 +12,7 @@ function HomeIndex() {
     useEffect(() => {
         async function fetchUserDetails() {
             const response = await fetch("http://localhost:8080/api/user-details", {
+                method: "GET",
                 credentials: "include",
             });
             if (response.ok) { // authorized user
@@ -30,7 +31,7 @@ function HomeIndex() {
                 <h1>Hey, {user.displayName}!</h1>
                 <br />
 
-                <h4>What's your mood right now?</h4>
+                <h4>What vibe are you looking for?</h4>
                 <HomeForm />
             </div>
         </Row>

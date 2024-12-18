@@ -1,3 +1,0 @@
-function ResultData(data) {
-    
-}
