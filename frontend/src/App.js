@@ -1,26 +1,28 @@
 import HomeIndex from './home/HomeIndex';
 import LoginIndex from './session/LoginIndex';
-import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
+import ResultIndex from './result/ResultIndex';
+import About from './About';
+import TopNavbar from './navigation/TopNavbar';
+import Footer from './navigation/Footer';
+import { Route, Routes } from 'react-router-dom';
+import { Container } from 'react-bootstrap';
 
-
-const router = createBrowserRouter(createRoutesFromElements(
-    <>
-        <Route path="/" element={<LoginIndex />} />
-
-        {/* Render home page if user is logged in */}
-        <Route path="/home" element={<HomeIndex />} />
-    </>
-));
 
 function App() {
-
     return (
         <div className="App h-100 row align-items-center">
-            <RouterProvider router={router}>
-                {/* The routes will be rendered here */}
-            </RouterProvider>
+            <TopNavbar />
+            
+            <Container>
+                <Routes>
+                    <Route path="/" element={<LoginIndex />} /> {/* renders component when the url matches */}
+                    <Route path="/home" element={<HomeIndex />} />
+                    <Route path="/result" element={<ResultIndex />} />
+                    <Route path="/about" element={<About />} />
+                </Routes>
+            </Container>
+            <Footer />
         </div>
-
     );
 }
 
