@@ -1,39 +1,35 @@
 import Form from 'react-bootstrap/Form';
 import { useEffect, useState } from 'react';
-
+import { motion } from 'framer-motion';
 
 function HomeForm() {
-    let [userMood, setUserMood] = useState('');
+    const [userMood, setUserMood] = useState('');
 
     const handleChange = (e) => {
         e.preventDefault();
         setUserMood(e.target.value);
-    }
-
+    };
 
     const handleError = (error) => {
         console.error('Error fetching tracks:', error);
         throw error;
-    }
+    };
 
     async function handleSubmit(e) {
         e.preventDefault();
 
         console.log('Submitted mood:', userMood);
 
-        userMood = encodeURIComponent(userMood.trim()); // remove whitespace from user input
+        const mood = encodeURIComponent(userMood.trim()); // remove whitespace from user input
 
-        const isEmpty = userMood.length === 0;
-        const isShort = userMood.length < 3; // shortest word could be "sad";
-
-        // validate user input
-        if (isEmpty || isShort) {
+        if (mood.length === 0 || mood.length < 3) {
             alert('Please enter a valid mood'); // TODO - replace with modal
             return;
         }
-        const response = await fetch(`http://localhost:8080/api/get-tracks?submission=${userMood}`, {
-            method: "GET",
-            credentials: "include", // Important to send cookies
+
+        const response = await fetch(`http://localhost:8080/api/get-tracks?submission=${mood}`, {
+            method: 'GET',
+            credentials: 'include', // Important to send cookies
         }).catch(handleError);
 
         if (response.status === 503) {
@@ -42,8 +38,6 @@ function HomeForm() {
         }
 
         const data = await response.json().catch(handleError);
-        console.log(data);
-
 
         if (response.ok) {
             // Pass the data as a prop to the result page
@@ -51,21 +45,64 @@ function HomeForm() {
         } else {
             alert('Failed to fetch tracks. Please try again.');
         }
-
-
     }
 
+    // Animation variants
+    const formVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { delay: 3, duration: 1, ease: 'easeOut' },
+        },
+    };
+
+    const inputVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { delay: 1.5, duration: 0.6 },
+        },
+    };
+
+    const textVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { delay: 1.5, duration: 0.9 },
+        },
+    };
 
     return (
-        <>
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={formVariants}
+            className="d-flex justify-content-center align-items-center"
+        >
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formUserMood">
-                    <Form.Label hidden>What vibe are you looking for?</Form.Label>
-                    <Form.Control type="text" onChange={handleChange} value={userMood} placeholder="Describe how you feel" />
-                    <Form.Text className="text-muted"><i>"winter makes me feel like falling in love"</i></Form.Text>
+
+                    <motion.label variants={textVariants}>
+                        <Form.Label hidden>Describe how you feel</Form.Label>
+                    </motion.label>
+
+                    <motion.div variants={inputVariants}>
+                        <Form.Control
+                            type="text"
+                            onChange={handleChange}
+                            value={userMood}
+                            autoComplete="off"
+                            placeholder='"I miss my grandma"'
+                            required
+                            className="form-control-lg"
+                        />
+                    </motion.div>
                 </Form.Group>
             </Form>
-        </>
+
+        </motion.div>
     );
 }
 

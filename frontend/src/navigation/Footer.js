@@ -1,19 +1,9 @@
 export default function Footer() {
     return (
-        <footer className="footer fixed-bottom">
-            <div className="container">
-                <div className="row">
-                    <div className="col">
-                        <div className="col-12 text-center">
-                            <p className="text-muted">2024 Vibin</p>
-                        </div>
-                    </div>
-                    <div className="col">
-                        <div className="col-12 text-center">
-                            <a href="https://github.com/ela-codes" className="text-muted">by ela-codes</a>
-                        </div>
-                    </div>
-                </div>
+        <footer className="container mt-auto">
+            <div id="footerText" className="container d-flex justify-content-center ">
+                <p className="text-white-50 px-4">Last updated Dec 2024</p>
+                <a href="https://github.com/ela-codes" className="text-white-50 px-4">by ela-codes</a>
             </div>
         </footer>
     );

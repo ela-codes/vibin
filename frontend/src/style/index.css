@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Titan+One&display=swap');
+
+html {
+    font-size: 1.2em;
+}
+
+body {
+    margin: 0;
+    font-family: "Instrument Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #16161a;
+    color: #fffffe;
+}
+
+body {
+    background: linear-gradient(303deg, #16161a, #23164b, #32235e, #271a4d);
+    background-size: 800% 800%;
+
+    animation: GradientBg 10s ease infinite;
+}
+
+@keyframes GradientBg {
+    0%{background-position:4% 0%}
+    50%{background-position:97% 100%}
+    100%{background-position:4% 0%}
+}
+
+#brandName {
+    margin: 0px;
+    font-weight: 800;
+}
+
+h1 {
+    padding: 0;
+    font-weight: 700;
+}
+
+.nav-link {
+    color: #e5e5e7;
+    font-weight: 600;
+}
+
+#navbarToggler {
+    padding: 0 0.5em;
+}
+
+span.navbar-toggler-icon {
+    width: 0.8em;
+}
+
+
+button {
+    background-color: #8f6cf6a0 !important;
+    color: #fffffe;
+    outline: none;
+    border: none !important;
+}
+
+#loginButton {
+    font-weight: 600;
+}
+
+#loginButton:active {
+    background-color: #7f5af0c0 !important;
+}
+
+
+#spotifyLogo {
+    width: 22px;
+    margin-top: -2px;
+}
+
+
+#userName {
+    color: #7f5af0;
+}
+
+#footerText {
+    font-size: clamp(0.5rem, 1rem, 1.2vb);
+}
+
+#formUserMood {
+    background: 0;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #7f5af057;
+    outline: none;
+    transition: box-shadow 0.5s ease;
+    color: #e5e5e7;
+    text-align: center;
+}
+
+#formUserMood:focus {
+    background: 0;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #7f5af057;
+    outline: none;
+    box-shadow: 0px 10px 10px -10px #7f5af0;
+}
+
+::placeholder {
+    text-align: center;
+    font-size: 1rem;
+    font-style: italic;
+    color: rgb(157, 157, 157) !important;
+}
+
+#formUserMood:focus::placeholder {
+    opacity: 0;
+  }

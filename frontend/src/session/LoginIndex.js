@@ -9,10 +9,10 @@ function LoginIndex() {
 
 
     return (
-        <div className="row justify-content-center">
-            <div className="col-6">
+        <div className="container d-flex justify-content-center">
+            <div className="">
                 {errorMsg && ErrorAlert(errorMsg)}
-                <h1>Connect your Spotify</h1>
+                <h1 className="pb-5">There's a song for that <em>vibe</em>.</h1>
                 <LoginButton />
             </div>
         </div>
