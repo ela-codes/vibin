@@ -7,6 +7,7 @@ import ela.project.vibin.config.HuggingFaceApiPropertiesConfig;
 import ela.project.vibin.service.abstraction.EmotionRecognitionService;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -41,11 +42,19 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
         // complete building the HTTP request
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
-        // make the API call
-        ResponseEntity<String> response = restTemplate.exchange(
-                URI.create(HF_API_URL), HttpMethod.POST, entity, String.class);
+        try {
+            // make the API call
+            ResponseEntity<String> response = restTemplate.exchange(
+                    URI.create(HF_API_URL), HttpMethod.POST, entity, String.class);
 
-        return response.getStatusCode() == HttpStatus.OK;
+            return response.getStatusCode() == HttpStatus.OK;
+        } catch (HttpServerErrorException e) {
+            if (e.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {
+                return false;
+            } else {
+                throw new RuntimeException("API returned an unhandled non-OK status: " + e.getMessage());
+            }
+        }
     }
 
     @Override
