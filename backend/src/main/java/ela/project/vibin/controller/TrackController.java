@@ -1,5 +1,6 @@
 package ela.project.vibin.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import ela.project.vibin.model.EmotionType;
 import ela.project.vibin.model.ErrorResponse;
 import ela.project.vibin.model.Track;
@@ -55,8 +56,8 @@ public class TrackController {
 
         // check if model is ready
         if (!emotionRecognitionServiceImpl.isModelReady()) {
-            return new ResponseEntity<>(
-                    new ErrorResponse("Model is currently loading."), HttpStatus.SERVICE_UNAVAILABLE
+            return new ResponseEntity<>(new ErrorResponse("Emotion recognition model is loading."),
+                    HttpStatus.SERVICE_UNAVAILABLE
             );
         }
 
@@ -79,8 +80,14 @@ public class TrackController {
 
             return new ResponseEntity<>(tracksList, HttpStatus.OK);
 
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("Track error: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }  catch (JsonProcessingException e) {
+            return new ResponseEntity<>(new ErrorResponse("JsonProcessingException error: " + e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(new ErrorResponse("RuntimeException error: " + e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 

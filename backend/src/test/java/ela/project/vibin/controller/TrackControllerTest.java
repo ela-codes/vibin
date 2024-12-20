@@ -2,6 +2,7 @@ package ela.project.vibin.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ela.project.vibin.model.EmotionType;
+import ela.project.vibin.model.ErrorResponse;
 import ela.project.vibin.model.Track;
 import ela.project.vibin.service.EmotionRecognitionServiceImpl;
 import ela.project.vibin.service.EmotionServiceImpl;
@@ -74,10 +75,12 @@ public class TrackControllerTest {
         // Act
         ResponseEntity<?> response1 = trackController.getTracks("xy", session);
         ResponseEntity<?> response2 = trackController.getTracks(null, session);
+        ResponseEntity<?> response3 = trackController.getTracks(" ", session);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response1.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, response2.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response3.getStatusCode());
     }
 
     @Test
@@ -85,6 +88,7 @@ public class TrackControllerTest {
         // Arrange
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute("userId")).thenReturn("someUserId");
+        when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(true);
         when(emotionRecognitionServiceImpl.analyze(anyString())).thenThrow(new RuntimeException("Test Exception"));
 
         // Act
@@ -97,26 +101,46 @@ public class TrackControllerTest {
     @Test
     void getTracks_validInput_returnsListOfTracks() throws JsonProcessingException {
         // Arrange
+        Track track1 = new Track("track 1", "trackId1");
+        Track track2 = new Track("track 2", "trackId2");
+
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute("userId")).thenReturn("someUserId");
+        when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(true);
         when(emotionRecognitionServiceImpl.analyze("valid input")).thenReturn("joy");
         when(emotionServiceImpl.getEmotionId(EmotionType.joy)).thenReturn(UUID.randomUUID());
         when(moodServiceImpl.getAllMoodIds(any(UUID.class))).thenReturn(List.of(UUID.randomUUID()));
         when(genreServiceImpl.getAllGenreNames(anyList())).thenReturn(List.of("pop"));
         when(spotifyQueryServiceImpl.getSpotifyPlaylistId(anyList(), any(HttpSession.class))).thenReturn("playlistId");
         when(spotifyQueryServiceImpl.getSpotifyTracks(anyString(), any(HttpSession.class)))
-                .thenReturn(List.of(
-                        new Track("track 1", "trackId1"),
-                        new Track("track 2", "trackId2")));
+                .thenReturn(List.of(track1, track2));
 
         // Act
         ResponseEntity<?> response = trackController.getTracks("valid input", session);
-        List<Track> trackResponse = (List<Track>) response.getBody();
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(trackResponse);
-        assertTrue(trackResponse.contains("track 1"));
-        assertTrue(trackResponse.contains("track 2"));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof List<?>);
+        List<Track> trackResponse = (List<Track>) response.getBody();
+        assertTrue(trackResponse.contains(track1));
+        assertTrue(trackResponse.contains(track2));
+    }
+
+    @Test
+    void getTracks_modelNotReady_returnsHttpStatusServiceUnavailable() {
+        // Arrange
+        HttpSession session = mock(HttpSession.class);
+        when(session.getAttribute("userId")).thenReturn("someUserId");
+        when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(false);
+
+        // Act
+        ResponseEntity<?> response = trackController.getTracks("valid input", session);
+
+        // Assert
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ErrorResponse);
+        assertEquals("Emotion recognition model is loading.", ((ErrorResponse) response.getBody()).getMessage());
+
     }
 }
