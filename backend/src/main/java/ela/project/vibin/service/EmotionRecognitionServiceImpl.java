@@ -28,17 +28,23 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
     public boolean isModelReady() {
         final String HF_API_URL = hfPropertiesConfig.getApiUrl();
         final String HF_API_TOKEN = hfPropertiesConfig.getApiToken();
+        final String RANDOM_INPUT = "I feel happy today";
 
         // build HTTP request
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + HF_API_TOKEN);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        // pass the input as part of the body
+        String body = " {\"inputs\": \"" + RANDOM_INPUT + "\"}";
+
+        // complete building the HTTP request
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         // make the API call
         ResponseEntity<String> response = restTemplate.exchange(
-                URI.create(HF_API_URL), HttpMethod.GET, entity, String.class);
+                URI.create(HF_API_URL), HttpMethod.POST, entity, String.class);
+
         return response.getStatusCode() == HttpStatus.OK;
     }
 
@@ -69,17 +75,6 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
                     URI.create(HF_API_URL), HttpMethod.POST, entity, String.class
             );
             String responseBody = response.getBody();
-
-            // Handle model loading error
-            if (responseBody.contains("\"error\"")) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode rootNode = objectMapper.readTree(responseBody);
-                String errorMessage = rootNode.path("error").asText();
-                double estimatedTime = rootNode.path("estimated_time").asDouble();
-                throw new RuntimeException(
-                        String.format("API Error: %s. Estimated time: %.2f seconds", errorMessage, estimatedTime)
-                );
-            }
 
             return extractEmotion(responseBody);
         } catch (RuntimeException e) {

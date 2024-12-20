@@ -97,35 +97,6 @@ class EmotionRecognitionServiceImplTest {
     }
 
     @Test
-    public void analyze_apiErrorResponse_throwsRuntimeException() {
-        // Arrange
-        String input = "test input";
-        String mockErrorResponse = """
-            {
-                "error": "Model mrm8488/t5-base-finetuned-emotion is currently loading",
-                "estimated_time": 35.6677131652832
-            }
-            """;
-
-        when(hfPropertiesConfig.getApiUrl()).thenReturn("mockApiUrl");
-        when(hfPropertiesConfig.getApiToken()).thenReturn("mockApiToken");
-
-        when(restTemplate.exchange(
-                Mockito.any(URI.class),
-                Mockito.eq(HttpMethod.POST),
-                Mockito.any(HttpEntity.class),
-                Mockito.eq(String.class)
-        )).thenReturn(new ResponseEntity<>(mockErrorResponse, HttpStatus.OK));
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            emotionRecognitionService.analyze(input);
-        });
-
-        assertTrue(exception.getMessage().contains("Model mrm8488/t5-base-finetuned-emotion is currently loading"));
-    }
-
-    @Test
     public void analyze_nonJsonResponse_throwsJsonProcessingException() {
         // Arrange
         String input = "test input";
@@ -156,11 +127,13 @@ class EmotionRecognitionServiceImplTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer mockApiToken");
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String body = " {\"inputs\": \"" + "I feel happy today" + "\"}";
+
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         when(restTemplate.exchange(
                 Mockito.any(URI.class),
-                Mockito.eq(HttpMethod.GET),
+                Mockito.eq(HttpMethod.POST),
                 Mockito.eq(entity),
                 Mockito.eq(String.class)
         )).thenReturn(new ResponseEntity<>("{}", HttpStatus.OK));
@@ -168,7 +141,7 @@ class EmotionRecognitionServiceImplTest {
         // Act
         boolean result = emotionRecognitionService.isModelReady();
 
-        // Arrange
+        // Assert
         assertTrue(result);
     }
 
@@ -181,11 +154,13 @@ class EmotionRecognitionServiceImplTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer mockApiToken");
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String body = " {\"inputs\": \"" + "I feel happy today" + "\"}";
+
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         when(restTemplate.exchange(
                 Mockito.any(URI.class),
-                Mockito.eq(HttpMethod.GET),
+                Mockito.eq(HttpMethod.POST),
                 Mockito.eq(entity),
                 Mockito.eq(String.class)
         )).thenReturn(new ResponseEntity<>("{}", HttpStatus.SERVICE_UNAVAILABLE));
@@ -193,7 +168,7 @@ class EmotionRecognitionServiceImplTest {
         // Act
         boolean result = emotionRecognitionService.isModelReady();
 
-        // Arrange
+        // Assert
         assertFalse(result);
     }
 
