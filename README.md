@@ -3,6 +3,8 @@
 
 Turn your emotions into the perfect playlist! This app analyzes user input like *"I feel cozy at home while it’s raining outside"* to identify moods and match them to Spotify songs that resonate. Whether you're feeling nostalgic, energized, or relaxed, this app delivers personalized music recommendations tailored to your vibe.  
 
+https://github.com/user-attachments/assets/b2a911f6-7159-458d-8544-ac6bc18475dd
+
 ---
 
 ## 🚀 Purpose  
