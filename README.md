@@ -17,7 +17,7 @@ Designed to explore API integrations, sentiment analysis, and scalable applicati
 ## 🛠️ Tech Stack  
 - **Backend**: Spring Boot for RESTful API development and business logic.  
 - **Frontend**: React and Bootstrap for a responsive and dynamic user interface.  
-- **Database**: PostgreSQL via Supabase for managing user preferences, moods, and genres.  
+- **Database**: PostgreSQL via Supabase for managing users, emotions, moods, and genres.  
 - **APIs**:  
   - **Hugging Face**: Emotion detection and sentiment analysis.  
   - **Spotify API**: Song search and playlist generation.  
