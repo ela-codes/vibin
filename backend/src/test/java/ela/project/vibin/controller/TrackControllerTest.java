@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -89,7 +87,7 @@ public class TrackControllerTest {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute("userId")).thenReturn("someUserId");
         when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(true);
-        when(emotionRecognitionServiceImpl.analyze(anyString())).thenThrow(new RuntimeException("Test Exception"));
+        when(emotionRecognitionServiceImpl.analyze(anyString(), false)).thenThrow(new RuntimeException("Test Exception"));
 
         // Act
         ResponseEntity<?> response = trackController.getTracks("valid input", session);
@@ -107,7 +105,7 @@ public class TrackControllerTest {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute("userId")).thenReturn("someUserId");
         when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(true);
-        when(emotionRecognitionServiceImpl.analyze("valid input")).thenReturn("joy");
+        when(emotionRecognitionServiceImpl.analyze("valid input", false)).thenReturn("joy");
         when(emotionServiceImpl.getEmotionId(EmotionType.joy)).thenReturn(UUID.randomUUID());
         when(moodServiceImpl.getAllMoodIds(any(UUID.class))).thenReturn(List.of(UUID.randomUUID()));
         when(genreServiceImpl.getAllGenreNames(anyList())).thenReturn(List.of("pop"));
