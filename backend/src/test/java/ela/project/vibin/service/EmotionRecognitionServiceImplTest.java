@@ -54,17 +54,58 @@ class EmotionRecognitionServiceImplTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + "mockApiToken");
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> mockRequest = new HttpEntity<>(body, headers);
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         when(restTemplate.exchange(
                 Mockito.any(URI.class),
                 Mockito.eq(HttpMethod.POST),
-                Mockito.any(HttpEntity.class),
+                Mockito.eq(entity),
                 Mockito.eq(String.class)
         )).thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
 
         // Act
-        String emotion = emotionRecognitionService.analyze(input);
+        String emotion = emotionRecognitionService.analyze(input, false);
+
+        // Assert
+        assertEquals(expectedEmotion, emotion);
+    }
+
+
+    @Test
+    public void analyze_waitForModelIsTrue_returnsEmotion() throws JsonProcessingException {
+        // Arrange
+        String input = "i miss my grandma";
+        String expectedEmotion = "sadness";
+
+        when(hfPropertiesConfig.getApiUrl()).thenReturn("mockApiUrl");
+        when(hfPropertiesConfig.getApiToken()).thenReturn("mockApiToken");
+
+        // Mock RestTemplate response
+        String mockResponse = """
+                [
+                    {
+                        "generated_text": "sadness"
+                    }
+                ]
+                """;
+
+        String body = " {\"inputs\": \"" + input + "\"}";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + "mockApiToken");
+        headers.set("x-wait-for-model", "true");
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+        when(restTemplate.exchange(
+                Mockito.any(URI.class),
+                Mockito.eq(HttpMethod.POST),
+                Mockito.eq(entity),
+                Mockito.eq(String.class)
+        )).thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
+
+        // Act
+        String emotion = emotionRecognitionService.analyze(input, true);
 
         // Assert
         assertEquals(expectedEmotion, emotion);
@@ -77,7 +118,7 @@ class EmotionRecognitionServiceImplTest {
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            emotionRecognitionService.analyze(input);
+            emotionRecognitionService.analyze(input, false);
         });
 
         assertEquals("Input cannot be empty", exception.getMessage());
@@ -90,7 +131,7 @@ class EmotionRecognitionServiceImplTest {
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            emotionRecognitionService.analyze(input);
+            emotionRecognitionService.analyze(input, false);
         });
 
         assertEquals("Input cannot be empty", exception.getMessage());
@@ -114,7 +155,7 @@ class EmotionRecognitionServiceImplTest {
 
         // Act & Assert
         assertThrows(JsonProcessingException.class, () -> {
-            emotionRecognitionService.analyze(input);
+            emotionRecognitionService.analyze(input, false);
         });
     }
 
