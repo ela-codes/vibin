@@ -81,8 +81,6 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
 
         // complete building the HTTP request
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
-        System.out.println("waitforModel: " + waitForModel);
-        System.out.println("entity: " + entity);
 
         // make the API call
         try {
