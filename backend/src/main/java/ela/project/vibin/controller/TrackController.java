@@ -43,6 +43,8 @@ public class TrackController {
             @RequestParam(value = "submission") String input,
             HttpSession session) {
 
+        boolean waitForModel = false;
+
         // validate session principal
         // TODO - maybe check that the user is in the database?
         if (session.getAttribute("userId") == null) {
@@ -56,14 +58,13 @@ public class TrackController {
 
         // check if model is ready
         if (!emotionRecognitionServiceImpl.isModelReady()) {
-            return new ResponseEntity<>(new ErrorResponse("Emotion recognition model is loading."),
-                    HttpStatus.SERVICE_UNAVAILABLE
-            );
+            // if not ready, indicate that we need to set wait-for-model flag = true
+            waitForModel = true;
         }
 
         try {
             // transform input to emotion
-            EmotionType emotionName = EmotionType.valueOf(emotionRecognitionServiceImpl.analyze(input));
+            EmotionType emotionName = EmotionType.valueOf(emotionRecognitionServiceImpl.analyze(input, waitForModel));
             UUID emotionId = emotionServiceImpl.getEmotionId(emotionName);
 
             // get moods based on emotion

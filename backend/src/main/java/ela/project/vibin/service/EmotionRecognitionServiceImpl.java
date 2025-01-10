@@ -58,7 +58,7 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
     }
 
     @Override
-    public String analyze(String input) throws JsonProcessingException {
+    public String analyze(String input, boolean waitForModel) throws JsonProcessingException {
 
         if (input == null || input.trim().isEmpty()) {
             throw new IllegalArgumentException("Input cannot be empty");
@@ -72,11 +72,17 @@ public class EmotionRecognitionServiceImpl implements EmotionRecognitionService 
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + HF_API_TOKEN);
 
+        if (waitForModel) {
+            headers.set("x-wait-for-model", "true");
+        }
+
         // pass the input as part of the body
         String body = " {\"inputs\": \"" + input + "\"}";
 
         // complete building the HTTP request
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
+        System.out.println("waitforModel: " + waitForModel);
+        System.out.println("entity: " + entity);
 
         // make the API call
         try {
