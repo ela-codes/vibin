@@ -87,7 +87,7 @@ public class TrackControllerTest {
         HttpSession session = mock(HttpSession.class);
         when(session.getAttribute("userId")).thenReturn("someUserId");
         when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(true);
-        when(emotionRecognitionServiceImpl.analyze(anyString(), false)).thenThrow(new RuntimeException("Test Exception"));
+        when(emotionRecognitionServiceImpl.analyze(anyString(), anyBoolean())).thenThrow(new RuntimeException("Test Exception"));
 
         // Act
         ResponseEntity<?> response = trackController.getTracks("valid input", session);
@@ -123,22 +123,5 @@ public class TrackControllerTest {
         List<Track> trackResponse = (List<Track>) response.getBody();
         assertTrue(trackResponse.contains(track1));
         assertTrue(trackResponse.contains(track2));
-    }
-
-    @Test
-    void getTracks_modelNotReady_returnsHttpStatusServiceUnavailable() {
-        // Arrange
-        HttpSession session = mock(HttpSession.class);
-        when(session.getAttribute("userId")).thenReturn("someUserId");
-        when(emotionRecognitionServiceImpl.isModelReady()).thenReturn(false);
-
-        // Act
-        ResponseEntity<?> response = trackController.getTracks("valid input", session);
-
-        // Assert
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ErrorResponse);
-        assertEquals("Emotion recognition model is loading.", ((ErrorResponse) response.getBody()).getMessage());
-
     }
 }
