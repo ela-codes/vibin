@@ -64,7 +64,8 @@ class SpotifyQueryServiceImplTest {
         )).thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
 
         // Act
-        String actualPlaylistId = spotifyQueryService.getSpotifyPlaylistId(List.of("pop", "rock"), session);
+        List<String> actualGenreList = List.of("pop", "rock");
+        String actualPlaylistId = spotifyQueryService.getSpotifyPlaylistId(actualGenreList, session);
 
         // Assert the result
         assertEquals(expectedPlaylistId, actualPlaylistId);

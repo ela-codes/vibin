@@ -180,11 +180,12 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
         return rand.nextInt(max);
     }
 
-    private String mapGenreListToString(List<String> genreList) {
+    private String mapGenreListToString(List<String> genres) {
         // Remove any duplicates in genreList
         Set<String> genreSet = new HashSet<>();
 
         // Randomize order of genres to avoid repetitive genre results
+        List<String> genreList = new ArrayList<>(genres);
         Collections.shuffle(genreList);
 
         // Ensure spaces inside genre names are replaced with '+'
@@ -193,8 +194,8 @@ public class SpotifyQueryServiceImpl implements SpotifyQueryService {
             genreSet.add(properGenreFormat);
         }
         // Map genreSet to a single string
-        String genres = String.join("+", genreSet);
+        String formattedGenres = String.join("+", genreSet);
 
-        return genres;
+        return formattedGenres;
     }
 }
