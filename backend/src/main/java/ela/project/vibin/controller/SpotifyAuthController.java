@@ -1,5 +1,6 @@
 package ela.project.vibin.controller;
 
+import ela.project.vibin.config.FrontEndConfig;
 import ela.project.vibin.service.UserServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,13 @@ public class SpotifyAuthController {
 
     private final SpotifyApi spotifyApi;
     private final UserServiceImpl userServiceImpl;
+    private final FrontEndConfig frontEndConfig;
 
     // constructor injection
-    public SpotifyAuthController(SpotifyApi spotifyApi, UserServiceImpl userServiceImpl) {
+    public SpotifyAuthController(SpotifyApi spotifyApi, UserServiceImpl userServiceImpl, FrontEndConfig frontEndConfig) {
         this.spotifyApi = spotifyApi;
         this.userServiceImpl = userServiceImpl;
+        this.frontEndConfig = frontEndConfig;
     }
 
     @GetMapping("/login")
@@ -60,7 +63,7 @@ public class SpotifyAuthController {
         if (!error.isEmpty()) {
             return ResponseEntity
                     .status(302)
-                    .header("Location", "http://localhost:3000/?error=UserDeniedAuthorization")
+                    .header("Location", frontEndConfig.getUrl() + "/?error=UserDeniedAuthorization")
                     .build();
         }
 
@@ -70,7 +73,7 @@ public class SpotifyAuthController {
         // If there is a mismatch then reject the request and stop auth flow
         if (storedState == null || !storedState.equals(state)) {
             return ResponseEntity.status(302)
-                    .header("Location", "http://localhost:3000/?error=InvalidState")
+                    .header("Location", frontEndConfig.getUrl() + "/?error=InvalidState")
                     .build();
         }
 
@@ -102,7 +105,7 @@ public class SpotifyAuthController {
 
             // if successful, redirect user to home page
             return ResponseEntity.status(302)
-                    .header("Location", "http://localhost:3000/home")
+                    .header("Location", frontEndConfig.getUrl() + "/home")
                     .build();
 
         } catch (Exception e) {
