@@ -8,14 +8,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
+    private final FrontEndConfig frontEndConfig;
+
+    public WebConfig(FrontEndConfig frontEndConfig) {
+        this.frontEndConfig = frontEndConfig;
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-        .allowedOrigins("http://localhost:3000")
+        .allowedOrigins(frontEndConfig.getUrl())
                 .allowedMethods("GET", "POST")
-                .allowedHeaders("*")
-                .allowCredentials(true); // since it's a local application
+                .allowedHeaders("*");
     }
-
 }
