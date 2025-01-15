@@ -5,7 +5,7 @@ import spotifyLogo from "../style/Spotify_Primary_Logo_RGB_White.png";
 export default function LoginButton() {
 
     async function handleLogin() {
-        const response = await fetch("http://localhost:8080/api/login", {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
             method: "GET",
             credentials: "include", // Important to send cookies
         });

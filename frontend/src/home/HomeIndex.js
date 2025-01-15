@@ -10,7 +10,7 @@ function HomeIndex() {
 
     useEffect(() => {
         async function fetchUserDetails() {
-            const response = await fetch("http://localhost:8080/api/user-details", {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/user-details`, {
                 method: "GET",
                 credentials: "include",
             });
