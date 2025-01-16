@@ -31,3 +31,7 @@ Designed to explore API integrations, sentiment analysis, and scalable applicati
 3. **User-Centric Design**: Creating an intuitive and engaging interface made me realize the value of combining functionality with user experience.  
 4. **Testing and Debugging**: Writing comprehensive tests for API-driven functionality enhanced code reliability and reduced debugging time _significantly_.  
 
+---
+
+## ➡️ Next Steps
+1. Deploy the app using technologies such as Docker, Azure, Redis, and Vercel. (IN-PROGRESS)
