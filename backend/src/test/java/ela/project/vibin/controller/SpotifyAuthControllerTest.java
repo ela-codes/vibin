@@ -1,6 +1,8 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.config.FrontEndConfig;
+import ela.project.vibin.model.SessionData;
+import ela.project.vibin.service.RedisSessionService;
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,11 @@ class SpotifyAuthControllerTest {
     @Mock
     private UserServiceImpl mockUserServiceImpl;
 
-    private MockHttpSession mockSession;
+    @Mock
+    private MockHttpSession mockSession;  // temporary
+
+    @Mock
+    private RedisSessionService redisSessionService;
 
     @Mock
     private FrontEndConfig frontEndConfig;
@@ -38,8 +44,7 @@ class SpotifyAuthControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig);
-        mockSession = new MockHttpSession();
+        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig, redisSessionService);
     }
 
     @Test
@@ -61,12 +66,11 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenReturn(expectedUri);
 
         // Act
-        String result = controller.login(mockSession);
+        String result = controller.login();
 
         // Assert
         assertNotNull(result);
         assertEquals(expectedUrl, result);
-        assertNotNull(mockSession.getAttribute("state"));
 
         // Verify the builder methods were called
         verify(builder).state(any());
@@ -91,7 +95,7 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenReturn(URI.create("https://test.com"));
 
         // Act
-        controller.login(mockSession);
+        controller.login();
 
         // Assert
         String storedState = (String) mockSession.getAttribute("state");
@@ -113,7 +117,7 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenThrow(new RuntimeException("Spotify API Error"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> controller.login(mockSession));
+        assertThrows(RuntimeException.class, () -> controller.login());
     }
 
 
