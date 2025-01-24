@@ -1,9 +1,8 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.config.FrontEndConfig;
-import ela.project.vibin.model.SessionData;
-import ela.project.vibin.service.RedisSessionService;
 import ela.project.vibin.service.UserServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,25 +25,24 @@ public class SpotifyAuthController {
     private final SpotifyApi spotifyApi;
     private final UserServiceImpl userServiceImpl;
     private final FrontEndConfig frontEndConfig;
-    private final RedisSessionService redisSessionService;
+
 
     public SpotifyAuthController(SpotifyApi spotifyApi, UserServiceImpl userServiceImpl,
-                                 FrontEndConfig frontEndConfig, RedisSessionService redisSessionService) {
+                                 FrontEndConfig frontEndConfig) {
         this.spotifyApi = spotifyApi;
         this.userServiceImpl = userServiceImpl;
         this.frontEndConfig = frontEndConfig;
-        this.redisSessionService = redisSessionService;
     }
 
     @GetMapping("/login")
-    public String login() {
-        String state = UUID.randomUUID().toString();
+    public String login(HttpSession session) {
+        String generatedState = UUID.randomUUID().toString();
 
         // Store the random UUID value in Redis
-        redisSessionService.storeSessionData(state, null);
+        session.setAttribute("state", generatedState);
 
         AuthorizationCodeUriRequest authRequest = spotifyApi.authorizationCodeUri()
-                .state(state)
+                .state(generatedState)
                 .scope("playlist-modify-public user-read-email")
                 .show_dialog(true)
                 .build();
@@ -57,8 +55,9 @@ public class SpotifyAuthController {
     @GetMapping("/callback")
     public ResponseEntity<String> handleSpotifyCallback(
             @RequestParam(value = "code", required = false) String code,
-            @RequestParam(value = "state") String state,
-            @RequestParam(value = "error", defaultValue = "") String error) {
+            @RequestParam(value = "state") String spotifyState,
+            @RequestParam(value = "error", defaultValue = "") String error,
+            HttpSession session) {
 
         if (!error.isEmpty()) {
             return ResponseEntity
@@ -68,9 +67,10 @@ public class SpotifyAuthController {
         }
 
         // Retrieve the stored state from Redis
-        SessionData sessionData = redisSessionService.retrieveSessionData(state);
+        String storedState = (String) session.getAttribute("state");
 
-        if (sessionData == null || !state.equals(sessionData.getState())) {
+        // Compare the state from the response from Spotify with the stored state in Redis
+        if (storedState == null || !spotifyState.equals(storedState)) {
             return ResponseEntity.status(302)
                     .header("Location", frontEndConfig.getUrl() + "/?error=InvalidState")
                     .build();
@@ -86,16 +86,17 @@ public class SpotifyAuthController {
             spotifyApi.setAccessToken(credentials.getAccessToken());
             spotifyApi.setRefreshToken(credentials.getRefreshToken());
 
+            // Build the user object
             User user = spotifyApi.getCurrentUsersProfile()
                     .build()
                     .execute();
 
             userServiceImpl.saveUser(user.getEmail());
 
-            // Update user details in Redis
-            sessionData.setUserId(user.getId());
-            redisSessionService.storeSessionData(sessionData.getState(), user.getId());
-            System.out.println(sessionData.getState() + ", " + sessionData.getUserId());
+            // Save user info to session
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("displayName", user.getDisplayName());
+            session.setAttribute("accessToken", credentials.getAccessToken());
 
             return ResponseEntity.status(302)
                     .header("Location", frontEndConfig.getUrl() + "/home")
@@ -107,18 +108,17 @@ public class SpotifyAuthController {
     }
 
     @GetMapping("/user-details")
-    public ResponseEntity<Map<String, String>> getUserDetails(@RequestParam("state") String state) {
-        SessionData sessionData = redisSessionService.retrieveSessionData(state);
+    public ResponseEntity<Map<String, String>> getUserDetails(HttpSession session) {
+        String userId = (String) session.getAttribute("userId");
+        String displayName = (String) session.getAttribute("displayName");
 
-        if (sessionData == null || sessionData.getUserId() == null) {
-            return ResponseEntity.status(401).body(null);
+        if (userId == null) {
+            return ResponseEntity.status(401).body(null); // Unauthorized
         }
 
-        Map<String, String> userDetails = Map.of(
-                "userId", sessionData.getUserId()
-        );
-        return ResponseEntity.ok(userDetails);
+        return ResponseEntity.ok(Map.of("userId", userId, "displayName", displayName));
     }
-
 }
+
+
 

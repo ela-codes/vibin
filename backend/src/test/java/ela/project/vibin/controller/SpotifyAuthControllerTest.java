@@ -1,8 +1,7 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.config.FrontEndConfig;
-import ela.project.vibin.model.SessionData;
-import ela.project.vibin.service.RedisSessionService;
+
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,6 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.mock.web.MockHttpSession;
 import se.michaelthelin.spotify.SpotifyApi;
-import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import se.michaelthelin.spotify.model_objects.specification.User;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 
 import java.net.URI;
@@ -33,8 +30,8 @@ class SpotifyAuthControllerTest {
     @Mock
     private MockHttpSession mockSession;  // temporary
 
-    @Mock
-    private RedisSessionService redisSessionService;
+//    @Mock
+//    private RedisSessionService redisSessionService;
 
     @Mock
     private FrontEndConfig frontEndConfig;
@@ -44,7 +41,7 @@ class SpotifyAuthControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig, redisSessionService);
+        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig);
     }
 
     @Test
@@ -66,7 +63,7 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenReturn(expectedUri);
 
         // Act
-        String result = controller.login();
+        String result = controller.login(mockSession);
 
         // Assert
         assertNotNull(result);
@@ -95,7 +92,7 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenReturn(URI.create("https://test.com"));
 
         // Act
-        controller.login();
+        controller.login(mockSession);
 
         // Assert
         String storedState = (String) mockSession.getAttribute("state");
@@ -117,7 +114,7 @@ class SpotifyAuthControllerTest {
         when(request.execute()).thenThrow(new RuntimeException("Spotify API Error"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> controller.login());
+        assertThrows(RuntimeException.class, () -> controller.login(mockSession));
     }
 
 

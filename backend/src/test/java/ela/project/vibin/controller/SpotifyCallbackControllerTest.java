@@ -1,7 +1,6 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.config.FrontEndConfig;
-import ela.project.vibin.service.RedisSessionService;
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ public class SpotifyCallbackControllerTest {
     private MockHttpSession mockSession;
 
     @Mock
-    private RedisSessionService redisSessionService;
-
-    @Mock
     private AuthorizationCodeCredentials mockCredentials;
 
     @Mock
@@ -50,7 +46,7 @@ public class SpotifyCallbackControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig, redisSessionService);
+        controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig);
     }
 
     @Test
@@ -85,7 +81,7 @@ public class SpotifyCallbackControllerTest {
         when(mockUser.getDisplayName()).thenReturn("John Doe");
 
         // Act
-        ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, error);
+        ResponseEntity<String> response = controller.handleSpotifyCallback(code, validState, error, mockSession);
 
         // Assert
         assertEquals(HttpStatus.FOUND, response.getStatusCode());
@@ -112,7 +108,7 @@ public class SpotifyCallbackControllerTest {
         when(mockSession.getAttribute("oauth_state")).thenReturn("valid_state");
 
         // Act
-        ResponseEntity<String> response = controller.handleSpotifyCallback(code, invalidState, error);
+        ResponseEntity<String> response = controller.handleSpotifyCallback(code, invalidState, error, mockSession);
 
         // Assert
         assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());
@@ -125,7 +121,7 @@ public class SpotifyCallbackControllerTest {
         String error = "access_denied";
 
         // Act
-        ResponseEntity<String> response = controller.handleSpotifyCallback(null, validState, error);
+        ResponseEntity<String> response = controller.handleSpotifyCallback(null, validState, error, mockSession);
 
         // Assert
         assertEquals(HttpStatusCode.valueOf(302), response.getStatusCode());

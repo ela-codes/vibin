@@ -18,7 +18,7 @@ function HomeIndex() {
             if (response.ok) { // authorized user
                 const data = await response.json();
                 console.log(data);
-                setUserName(data.userId);
+                setUserName(data.displayName);
             } else if (response.status === 401) { // unauthorized access
                 navigate("/"); // go back to login page
             }
