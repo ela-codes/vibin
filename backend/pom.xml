@@ -12,7 +12,7 @@
 	<artifactId>vibin</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>vibin</name>
-	<description>Listen to music that matches your mood</description>
+	<description>Listen to music that matches your mood!</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -38,10 +38,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-security</artifactId>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
