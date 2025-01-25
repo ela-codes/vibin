@@ -46,7 +46,6 @@ public class TrackController {
         boolean waitForModel = false;
 
         // validate session principal
-        // TODO - maybe check that the user is in the database?
         if (session.getAttribute("userId") == null) {
             return new ResponseEntity<>(new ErrorResponse("Unauthorized access."), HttpStatus.UNAUTHORIZED);
         }

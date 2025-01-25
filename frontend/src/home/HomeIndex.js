@@ -5,18 +5,20 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 function HomeIndex() {
-    const [user, setUser] = useState({ userId: null, displayName: null });
+    const [userName, setUserName] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchUserDetails() {
+            console.log("Fetching user details...");
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/user-details`, {
                 method: "GET",
                 credentials: "include",
             });
             if (response.ok) { // authorized user
                 const data = await response.json();
-                setUser({ userId: data.userId, displayName: data.displayName });
+                console.log(data);
+                setUserName(data.displayName);
             } else if (response.status === 401) { // unauthorized access
                 navigate("/"); // go back to login page
             }
@@ -40,7 +42,7 @@ function HomeIndex() {
         visible: {
             opacity: 1,
             y: 0,
-            transition: { delay: 0.2, duration: 1 },
+            transition: { delay: 0.5, duration: 1 },
         },
     };
 
@@ -61,7 +63,7 @@ function HomeIndex() {
                 variants={containerVariants}
             >
                 <motion.h1 variants={h1Variants}>
-                    Hey <span id="userName">{user.displayName}</span>
+                    Hey <span id="userId">{userName}</span>
                 </motion.h1>
 
                 <motion.h5 variants={h5Variants}>

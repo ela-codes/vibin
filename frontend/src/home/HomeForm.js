@@ -1,5 +1,5 @@
 import Form from 'react-bootstrap/Form';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Loading from './Loading';
 
@@ -29,22 +29,23 @@ function HomeForm() {
             return;
         }
 
+        setIsLoading(true);
+
         // Call backend to fetch tracks
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-tracks?submission=${mood}`, {
             method: 'GET',
             credentials: 'include', // Important to send cookies
         }).catch(handleError);
 
-        setIsLoading(true);
 
         const data = await response.json().catch(handleError);
 
         if (response.ok) {
             // Pass the data as a prop to the result page
-            setTimeout(() => 
+            setTimeout(() =>
                 window.location.href = `/result?data=${encodeURIComponent(JSON.stringify(data))}`
-            , 5000);
-            
+                , 5000);
+
         } else {
             alert('Failed to fetch tracks. Please try again.');
         }

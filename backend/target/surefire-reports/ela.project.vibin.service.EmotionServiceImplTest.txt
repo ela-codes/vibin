@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: ela.project.vibin.service.EmotionServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.1 s - in ela.project.vibin.service.EmotionServiceImplTest

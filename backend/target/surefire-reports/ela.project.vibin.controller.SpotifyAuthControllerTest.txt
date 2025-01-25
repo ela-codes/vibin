@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: ela.project.vibin.controller.SpotifyAuthControllerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.421 s - in ela.project.vibin.controller.SpotifyAuthControllerTest

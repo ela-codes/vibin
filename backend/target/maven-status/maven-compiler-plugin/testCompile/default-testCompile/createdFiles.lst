@@ -1,0 +1,14 @@
+ela\project\vibin\service\MoodServiceImplTest.class
+ela\project\vibin\service\GenreServiceImplTest.class
+ela\project\vibin\repository\EmotionRepositoryTest.class
+ela\project\vibin\service\EmotionRecognitionServiceImplTest.class
+ela\project\vibin\controller\SpotifyAuthControllerTest.class
+ela\project\vibin\service\EmotionServiceImplTest.class
+ela\project\vibin\service\SpotifyQueryServiceImplTest.class
+ela\project\vibin\repository\UserRepositoryTest.class
+ela\project\vibin\repository\MoodRepositoryTest.class
+ela\project\vibin\VibinApplicationTests.class
+ela\project\vibin\controller\SpotifyCallbackControllerTest.class
+ela\project\vibin\controller\TrackControllerTest.class
+ela\project\vibin\repository\GenreRepositoryTest.class
+ela\project\vibin\service\UserServiceImplTest.class
