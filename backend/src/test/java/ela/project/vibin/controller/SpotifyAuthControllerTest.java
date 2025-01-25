@@ -1,22 +1,19 @@
 package ela.project.vibin.controller;
 
 import ela.project.vibin.config.FrontEndConfig;
-
 import ela.project.vibin.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockHttpServletRequest;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-
+import jakarta.servlet.http.HttpSession;
 import java.net.URI;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SpotifyAuthControllerTest {
@@ -28,94 +25,76 @@ class SpotifyAuthControllerTest {
     private UserServiceImpl mockUserServiceImpl;
 
     @Mock
-    private MockHttpSession mockSession;  // temporary
-
-//    @Mock
-//    private RedisSessionService redisSessionService;
-
-    @Mock
     private FrontEndConfig frontEndConfig;
 
     private SpotifyAuthController controller;
+
+    private MockHttpServletRequest request;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         controller = new SpotifyAuthController(mockSpotifyApi, mockUserServiceImpl, frontEndConfig);
+        request = new MockHttpServletRequest();
     }
 
     @Test
-    void login_ShouldGenerateAuthorizationUrl() {
+    void login_ShouldGenerateAuthorizationUrlAndStoreState() {
         // Arrange
         String expectedUrl = "https://accounts.spotify.com/authorize?client_id=test&response_type=code&redirect_uri=test";
         URI expectedUri = URI.create(expectedUrl);
 
-        // Create mocks for both the Builder and the Request
         AuthorizationCodeUriRequest.Builder builder = mock(AuthorizationCodeUriRequest.Builder.class);
-        AuthorizationCodeUriRequest request = mock(AuthorizationCodeUriRequest.class);
+        AuthorizationCodeUriRequest authorizationCodeUriRequest = mock(AuthorizationCodeUriRequest.class);
 
-        // Set up the chain of method calls
         when(mockSpotifyApi.authorizationCodeUri()).thenReturn(builder);
-        when(builder.state(anyString())).thenReturn(builder);
-        when(builder.scope(anyString())).thenReturn(builder);
-        when(builder.show_dialog(anyBoolean())).thenReturn(builder);
-        when(builder.build()).thenReturn(request);
-        when(request.execute()).thenReturn(expectedUri);
+        when(builder.state(anyString())).thenAnswer(invocation -> {
+            // Simulate storing the state in session
+            String state = invocation.getArgument(0, String.class);
+            HttpSession session = request.getSession();
+            session.setAttribute("state", state);
+            return builder;
+        });
+        when(builder.scope("playlist-modify-public user-read-email")).thenReturn(builder);
+        when(builder.show_dialog(true)).thenReturn(builder);
+        when(builder.build()).thenReturn(authorizationCodeUriRequest);
+        when(authorizationCodeUriRequest.execute()).thenReturn(expectedUri);
 
         // Act
-        String result = controller.login(mockSession);
+        String result = controller.login(request.getSession());
 
         // Assert
         assertNotNull(result);
         assertEquals(expectedUrl, result);
 
-        // Verify the builder methods were called
-        verify(builder).state(any());
+        // Verify the state was stored in session
+        HttpSession session = request.getSession();
+        String storedState = (String) session.getAttribute("state");
+        assertNotNull(storedState);
+        assertEquals(UUID.fromString(storedState).toString(), storedState); // Ensure it's a valid UUID
+
+        // Verify the builder was called with the correct configuration
+        verify(builder).state(storedState);
         verify(builder).scope("playlist-modify-public user-read-email");
         verify(builder).show_dialog(true);
         verify(builder).build();
-        verify(request).execute();
-    }
-
-
-    @Test
-    void login_ShouldStoreStateInSession() {
-        // Arrange
-        AuthorizationCodeUriRequest.Builder builder = mock(AuthorizationCodeUriRequest.Builder.class);
-        AuthorizationCodeUriRequest request = mock(AuthorizationCodeUriRequest.class);
-
-        when(mockSpotifyApi.authorizationCodeUri()).thenReturn(builder);
-        when(builder.state(anyString())).thenReturn(builder);
-        when(builder.scope(anyString())).thenReturn(builder);
-        when(builder.show_dialog(anyBoolean())).thenReturn(builder);
-        when(builder.build()).thenReturn(request);
-        when(request.execute()).thenReturn(URI.create("https://test.com"));
-
-        // Act
-        controller.login(mockSession);
-
-        // Assert
-        String storedState = (String) mockSession.getAttribute("state");
-        assertNotNull(storedState);
-        assertTrue(storedState.length() > 0);
+        verify(authorizationCodeUriRequest).execute();
     }
 
     @Test
     void login_ShouldHandleSpotifyApiException() {
         // Arrange
         AuthorizationCodeUriRequest.Builder builder = mock(AuthorizationCodeUriRequest.Builder.class);
-        AuthorizationCodeUriRequest request = mock(AuthorizationCodeUriRequest.class);
+        AuthorizationCodeUriRequest authorizationCodeUriRequest = mock(AuthorizationCodeUriRequest.class);
 
         when(mockSpotifyApi.authorizationCodeUri()).thenReturn(builder);
         when(builder.state(anyString())).thenReturn(builder);
-        when(builder.scope(anyString())).thenReturn(builder);
-        when(builder.show_dialog(anyBoolean())).thenReturn(builder);
-        when(builder.build()).thenReturn(request);
-        when(request.execute()).thenThrow(new RuntimeException("Spotify API Error"));
+        when(builder.scope("playlist-modify-public user-read-email")).thenReturn(builder);
+        when(builder.show_dialog(true)).thenReturn(builder);
+        when(builder.build()).thenReturn(authorizationCodeUriRequest);
+        when(authorizationCodeUriRequest.execute()).thenThrow(new RuntimeException("Spotify API Error"));
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> controller.login(mockSession));
+        assertThrows(RuntimeException.class, () -> controller.login(request.getSession()));
     }
-
-
 }
