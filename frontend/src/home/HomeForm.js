@@ -28,14 +28,14 @@ function HomeForm() {
             alert('Please enter a valid mood');
             return;
         }
-
+        setIsLoading(true);
         // Call backend to fetch tracks
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-tracks?submission=${mood}`, {
             method: 'GET',
             credentials: 'include', // Important to send cookies
         }).catch(handleError);
 
-        setIsLoading(true);
+        
 
         const data = await response.json().catch(handleError);
 
@@ -100,7 +100,7 @@ function HomeForm() {
                                     onChange={handleChange}
                                     value={userMood}
                                     autoComplete="off"
-                                    placeholder='"I miss my grandma"'
+                                    placeholder='"i miss my grandma"'
                                     required
                                     className="form-control-lg"
                                 />
