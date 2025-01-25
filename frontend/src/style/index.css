@@ -109,4 +109,13 @@ button {
 
 #formUserMood:focus::placeholder {
     opacity: 0;
-  }
+}
+
+
+#aboutPageImage {
+    width: clamp(200px, 50%, 300px)
+}
+
+#aboutPageSubText {
+    font-size: 0.7rem;
+}
