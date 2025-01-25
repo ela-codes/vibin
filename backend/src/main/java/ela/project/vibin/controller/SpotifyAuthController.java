@@ -59,6 +59,10 @@ public class SpotifyAuthController {
             @RequestParam(value = "error", defaultValue = "") String error,
             HttpSession session) {
 
+        System.out.println("Code: " + code);
+        System.out.println("State: " + spotifyState);
+        System.out.println("Error: " + error);
+
         if (!error.isEmpty()) {
             return ResponseEntity
                     .status(302)
@@ -68,6 +72,9 @@ public class SpotifyAuthController {
 
         // Retrieve the stored state from Redis
         String storedState = (String) session.getAttribute("state");
+
+        System.out.println("Stored State: " + storedState);
+        System.out.println("Received State: " + spotifyState);
 
         // Compare the state from the response from Spotify with the stored state in Redis
         if (storedState == null || !spotifyState.equals(storedState)) {
