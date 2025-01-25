@@ -28,23 +28,24 @@ function HomeForm() {
             alert('Please enter a valid mood');
             return;
         }
+
         setIsLoading(true);
+
         // Call backend to fetch tracks
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-tracks?submission=${mood}`, {
             method: 'GET',
             credentials: 'include', // Important to send cookies
         }).catch(handleError);
 
-        
 
         const data = await response.json().catch(handleError);
 
         if (response.ok) {
             // Pass the data as a prop to the result page
-            setTimeout(() => 
+            setTimeout(() =>
                 window.location.href = `/result?data=${encodeURIComponent(JSON.stringify(data))}`
-            , 5000);
-            
+                , 5000);
+
         } else {
             alert('Failed to fetch tracks. Please try again.');
         }
@@ -100,7 +101,7 @@ function HomeForm() {
                                     onChange={handleChange}
                                     value={userMood}
                                     autoComplete="off"
-                                    placeholder='"i miss my grandma"'
+                                    placeholder='"I miss my grandma"'
                                     required
                                     className="form-control-lg"
                                 />
