@@ -1,6 +1,7 @@
 import Button from 'react-bootstrap/Button';
 import { motion } from "motion/react";
 import spotifyLogo from "../style/Spotify_Primary_Logo_RGB_White.png";
+import { useEffect } from 'react';
 
 export default function LoginButton() {
 
@@ -10,12 +11,18 @@ export default function LoginButton() {
                 method: "GET",
                 credentials: "include",
                 headers: {
-                    "Accept": "application/json"
+                    "Accept": "application/json",
                 }
             });
+            
             if (!response.ok) {
                 throw new Error('Login failed');
             }
+            
+            // Store cookies in localStorage before redirect
+            const cookies = document.cookie;
+            localStorage.setItem('sessionCookies', cookies);
+            
             const spotifyLoginUrl = await response.text();
             window.location.href = spotifyLoginUrl;
         } catch (error) {
@@ -23,6 +30,13 @@ export default function LoginButton() {
         }
     }
 
+    useEffect(() => {
+        const savedCookies = localStorage.getItem('sessionCookies');
+        if (savedCookies) {
+            document.cookie = savedCookies;
+            localStorage.removeItem('sessionCookies');
+        }
+    }, []);
 
     return (
         <motion.div 
