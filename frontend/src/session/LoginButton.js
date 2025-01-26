@@ -5,12 +5,22 @@ import spotifyLogo from "../style/Spotify_Primary_Logo_RGB_White.png";
 export default function LoginButton() {
 
     async function handleLogin() {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
-            method: "GET",
-            credentials: "include", // Important to send cookies
-        });
-        const spotifyLoginUrl = await response.text();
-        window.location.href = spotifyLoginUrl;
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+            const spotifyLoginUrl = await response.text();
+            window.location.href = spotifyLoginUrl;
+        } catch (error) {
+            console.error('Login error:', error);
+        }
     }
 
 

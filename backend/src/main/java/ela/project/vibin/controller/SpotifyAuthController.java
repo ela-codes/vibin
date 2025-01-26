@@ -58,9 +58,10 @@ public class SpotifyAuthController {
             @RequestParam(value = "state") String spotifyState,
             @RequestParam(value = "error", defaultValue = "") String error,
             HttpSession session) {
+        System.out.println("Session ID on /callback: " + session.getId());
 
         System.out.println("Code: " + code);
-        System.out.println("State: " + spotifyState);
+        System.out.println("Spotify state: " + spotifyState);
         System.out.println("Error: " + error);
 
         if (!error.isEmpty()) {
@@ -77,9 +78,15 @@ public class SpotifyAuthController {
         System.out.println("Received State: " + spotifyState);
 
         // Compare the state from the response from Spotify with the stored state in Redis
-        if (storedState == null || !spotifyState.equals(storedState)) {
+        if (storedState == null) {
             return ResponseEntity.status(302)
-                    .header("Location", frontEndConfig.getUrl() + "/?error=InvalidState")
+                    .header("Location", frontEndConfig.getUrl() + "/?error=InvalidState-StateNull")
+                    .build();
+        }
+
+        if (!spotifyState.equals(storedState)) {
+            return ResponseEntity.status(302)
+                    .header("Location", frontEndConfig.getUrl() + "/?error=InvalidState-NotAMatch")
                     .build();
         }
 
