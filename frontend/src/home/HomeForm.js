@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Loading from './Loading';
 
-function HomeForm() {
+function HomeForm({userId}) {
     const [userMood, setUserMood] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +32,7 @@ function HomeForm() {
         setIsLoading(true);
 
         // Call backend to fetch tracks
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-tracks?submission=${mood}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-tracks?submission=${mood}&userId=${userId}`, {
             method: 'GET',
             credentials: 'include', // Important to send cookies
         }).catch(handleError);
