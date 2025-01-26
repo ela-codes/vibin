@@ -9,22 +9,36 @@ function HomeIndex() {
     const navigate = useNavigate();
 
     useEffect(() => {
+
         async function fetchUserDetails() {
-            console.log("Fetching user details...");
-            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/user-details`, {
-                method: "GET",
-                credentials: "include",
-            });
-            if (response.ok) { // authorized user
-                const data = await response.json();
-                console.log(data);
-                setUserName(data.displayName);
-            } else if (response.status === 401) { // unauthorized access
-                navigate("/"); // go back to login page
+            // Get spotify userId from query parameters
+            const queryParams = new URLSearchParams(window.location.search);
+            const userId = queryParams.get('userId'); 
+
+            if (!userId) {
+                navigate("/?error=Unauthorized");
+            }
+
+            try {
+                console.log(`Fetching user details for userId: ${userId}`);
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/user-details?userId=${encodeURIComponent(userId)}`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserName(data.displayName);
+                } else if (response.status === 401) {
+                    console.error("Unauthorized access.");
+                    navigate("/?error=Unauthorized"); // Redirect to login page
+                }
+            } catch (error) {
+                console.error("Error fetching user details:", error);
             }
         }
         fetchUserDetails();
-    }, [navigate]); // Added dependency array for better useEffect behavior
+    }, [navigate]);
 
     // Animation variants for the container
     const containerVariants = {
