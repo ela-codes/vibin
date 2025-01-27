@@ -6,6 +6,6 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 
 public interface SpotifyQueryService {
-    public String getSpotifyPlaylistId(List<String> genreList, HttpSession session);
-    public List<Track> getSpotifyTracks(String playlistId, HttpSession session);
+    public String getSpotifyPlaylistId(List<String> genreList, String accessToken);
+    public List<Track> getSpotifyTracks(String playlistId, String accessToken);
 }

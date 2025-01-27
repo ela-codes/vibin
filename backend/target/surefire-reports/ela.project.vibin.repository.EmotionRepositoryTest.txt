@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: ela.project.vibin.repository.EmotionRepositoryTest
--------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.258 s - in ela.project.vibin.repository.EmotionRepositoryTest

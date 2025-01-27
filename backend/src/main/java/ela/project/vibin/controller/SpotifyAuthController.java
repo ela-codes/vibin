@@ -3,6 +3,7 @@ package ela.project.vibin.controller;
 import ela.project.vibin.config.FrontEndConfig;
 import ela.project.vibin.service.UserServiceImpl;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,9 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,21 +29,21 @@ public class SpotifyAuthController {
     private final SpotifyApi spotifyApi;
     private final UserServiceImpl userServiceImpl;
     private final FrontEndConfig frontEndConfig;
-
+    private final StringRedisTemplate redisTemplate;
 
     public SpotifyAuthController(SpotifyApi spotifyApi, UserServiceImpl userServiceImpl,
-                                 FrontEndConfig frontEndConfig) {
+                                 FrontEndConfig frontEndConfig, StringRedisTemplate redisTemplate) {
         this.spotifyApi = spotifyApi;
         this.userServiceImpl = userServiceImpl;
         this.frontEndConfig = frontEndConfig;
+        this.redisTemplate = redisTemplate;
     }
 
     @GetMapping("/login")
     public String login(HttpSession session) {
         String generatedState = UUID.randomUUID().toString();
 
-        // Store the random UUID value in Redis
-        session.setAttribute("state", generatedState);
+        redisTemplate.opsForValue().set("spotify:state:" + generatedState, generatedState, Duration.ofMinutes(5));
 
         AuthorizationCodeUriRequest authRequest = spotifyApi.authorizationCodeUri()
                 .state(generatedState)
@@ -56,9 +60,7 @@ public class SpotifyAuthController {
     public ResponseEntity<String> handleSpotifyCallback(
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "state") String spotifyState,
-            @RequestParam(value = "error", defaultValue = "") String error,
-            HttpSession session) {
-        System.out.println("Session ID on /callback: " + session.getId());
+            @RequestParam(value = "error", defaultValue = "") String error) {
 
         System.out.println("Code: " + code);
         System.out.println("Spotify state: " + spotifyState);
@@ -72,7 +74,7 @@ public class SpotifyAuthController {
         }
 
         // Retrieve the stored state from Redis
-        String storedState = (String) session.getAttribute("state");
+        String storedState = redisTemplate.opsForValue().get("spotify:state:" + spotifyState);
 
         System.out.println("Stored State: " + storedState);
         System.out.println("Received State: " + spotifyState);
@@ -108,12 +110,14 @@ public class SpotifyAuthController {
             userServiceImpl.saveUser(user.getEmail());
 
             // Save user info to session
-            session.setAttribute("userId", user.getId());
-            session.setAttribute("displayName", user.getDisplayName());
-            session.setAttribute("accessToken", credentials.getAccessToken());
+            redisTemplate.opsForValue().set("spotify:user-name:" + user.getId(), user.getDisplayName(), Duration.ofHours(1));
+            redisTemplate.opsForValue().set("spotify:user-access:" + user.getId(), credentials.getAccessToken(), Duration.ofHours(1));
 
             return ResponseEntity.status(302)
-                    .header("Location", frontEndConfig.getUrl() + "/home")
+                    .header("Location",
+                            frontEndConfig.getUrl() + "/home?userId=" + URLEncoder.encode(
+                                    user.getId(), StandardCharsets.UTF_8
+                            ))
                     .build();
 
         } catch (Exception e) {
@@ -122,15 +126,15 @@ public class SpotifyAuthController {
     }
 
     @GetMapping("/user-details")
-    public ResponseEntity<Map<String, String>> getUserDetails(HttpSession session) {
-        String userId = (String) session.getAttribute("userId");
-        String displayName = (String) session.getAttribute("displayName");
+    public ResponseEntity<Map<String, String>> getUserDetails(@RequestParam("userId") String userId) {
+        // Retrieve user details from Redis
+        String displayName = redisTemplate.opsForValue().get("spotify:user-name:" + userId);
 
-        if (userId == null) {
+        if (displayName == null) {
             return ResponseEntity.status(401).body(null); // Unauthorized
         }
 
-        return ResponseEntity.ok(Map.of("userId", userId, "displayName", displayName));
+        return ResponseEntity.ok(Map.of("displayName", displayName));
     }
 }
 
